@@ -39,7 +39,7 @@ export class BunyanLoggerServer implements ILoggerServer {
     }
 
     protected updateLogLevels() {
-        for (const [loggerName, _] of this.loggers) {
+        for (const [loggerName] of this.loggers) {
             const newLevel = this.cli.logLevelFor(loggerName);
             this.setLogLevel(loggerName, newLevel);
         }
