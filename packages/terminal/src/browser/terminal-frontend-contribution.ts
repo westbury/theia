@@ -23,7 +23,7 @@ import { WorkspaceService } from '@theia/workspace/lib/browser';
 import { TERMINAL_WIDGET_FACTORY_ID, TerminalWidgetFactoryOptions, TerminalWidgetImpl } from './terminal-widget';
 import { TerminalKeybindingContexts } from "./terminal-keybinding-contexts";
 import { TerminalService } from './base/terminal-service';
-import { TerminalWidgetOptions, TerminalWidget } from './base/terminal-model';
+import { TerminalWidgetOptions, TerminalWidget } from './base/terminal-widget';
 
 export namespace TerminalCommands {
     export const NEW: Command = {
@@ -49,6 +49,11 @@ export namespace TerminalCommands {
     export const NEW_TERM_OPEN_WITH_SHELL_PATH: Command = {
         id: 'terminal:open:new:terminal:with:shell:path',
         label: 'Open new terminal with shell path'
+    };
+
+    export const NEW_TERM_OPEN_WITH_REACTION_ON_CLOSE_EVENT: Command = {
+        id: 'terminal:open:new:terminal:with:reaction:on:close:event',
+        label: 'Open new terminal with reaction on close event'
     };
 }
 
@@ -106,6 +111,18 @@ export class TerminalFrontendContribution implements TerminalService, CommandCon
             isEnabled: () => true,
             execute: async () => {
                 const termWidget = await this.newTerminal({shellPath: "sh"});
+                termWidget.start();
+                this.activateWidget(termWidget);
+            }
+        });
+
+        commands.registerCommand(TerminalCommands.NEW_TERM_OPEN_WITH_REACTION_ON_CLOSE_EVENT, {
+            isEnabled: () => true,
+            execute: async () => {
+                const termWidget = await this.newTerminal({});
+                termWidget.onTerminalDidClose(terminal => {
+                    console.log(terminal, "was closed");
+                });
                 termWidget.start();
                 this.activateWidget(termWidget);
             }

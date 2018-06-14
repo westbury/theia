@@ -8,7 +8,7 @@
 import * as Xterm from 'xterm';
 import { proposeGeometry } from 'xterm/lib/addons/fit/fit';
 import { inject, injectable, named, postConstruct } from "inversify";
-import { Disposable, DisposableCollection, ILogger } from '@theia/core/lib/common';
+import { Disposable, Event, Emitter , ILogger, DisposableCollection } from '@theia/core';
 import { Widget, BaseWidget, Message, WebSocketConnectionProvider, StatefulWidget, isFirefox, MessageLoop } from '@theia/core/lib/browser';
 import { WorkspaceService } from "@theia/workspace/lib/browser";
 import { ShellTerminalServerProxy } from '../common/shell-terminal-protocol';
@@ -16,7 +16,7 @@ import { terminalsPath } from '../common/terminal-protocol';
 import { IBaseTerminalServer } from '../common/base-terminal-protocol';
 import { TerminalWatcher } from '../common/terminal-watcher';
 import { ThemeService } from "@theia/core/lib/browser/theming";
-import { TerminalWidgetOptions, TerminalWidget } from './base/terminal-model';
+import { TerminalWidgetOptions, TerminalWidget } from './base/terminal-widget';
 
 export const TERMINAL_WIDGET_FACTORY_ID = 'terminal';
 
@@ -50,6 +50,7 @@ export class TerminalWidgetImpl extends BaseWidget implements TerminalWidget, St
     protected restored = false;
     protected closeOnDispose = true;
     private readonly TERMINAL = "Terminal";
+    private readonly onTermDidClose = new Emitter<TerminalWidget>();
 
     @inject(WorkspaceService) protected readonly workspaceService: WorkspaceService;
     @inject(WebSocketConnectionProvider) protected readonly webSocketConnectionProvider: WebSocketConnectionProvider;
@@ -59,7 +60,6 @@ export class TerminalWidgetImpl extends BaseWidget implements TerminalWidget, St
     @inject(ILogger) @named('terminal') protected readonly logger: ILogger;
     @inject("terminal-dom-id") public readonly id: string;
 
-    protected readonly onDidClosedActions = new DisposableCollection();
     protected readonly toDisposeOnConnect = new DisposableCollection();
 
     @postConstruct()
@@ -111,12 +111,14 @@ export class TerminalWidgetImpl extends BaseWidget implements TerminalWidget, St
         this.toDispose.push(this.terminalWatcher.onTerminalError(({ terminalId }) => {
             if (terminalId === this.terminalId) {
                 this.title.label = "<terminal error>";
+                console.log("error");
             }
         }));
         this.toDispose.push(this.terminalWatcher.onTerminalExit(({ terminalId }) => {
             if (terminalId === this.terminalId) {
                 this.title.label = "<terminated>";
-                this.onDidClosedActions.dispose();
+                this.onTermDidClose.fire(this);
+                this.onTermDidClose.dispose();
             }
         }));
         this.toDispose.push(this.toDisposeOnConnect);
@@ -335,8 +337,8 @@ export class TerminalWidgetImpl extends BaseWidget implements TerminalWidget, St
         // });
     }
 
-    onDidClosed(dispose: Disposable): void {
-        this.onDidClosedActions.push(dispose);
+    get onTerminalDidClose(): Event<TerminalWidget> {
+        return this.onTermDidClose.event;
     }
 
     dispose(): void {
@@ -344,6 +346,8 @@ export class TerminalWidgetImpl extends BaseWidget implements TerminalWidget, St
          * a refresh for example won't close it.  */
         if (this.closeOnDispose === true && typeof this.terminalId === "number") {
             this.shellTerminalServer.close(this.terminalId);
+            this.onTermDidClose.fire(this);
+            this.onTermDidClose.dispose();
         }
         super.dispose();
     }

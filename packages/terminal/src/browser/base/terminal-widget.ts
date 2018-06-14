@@ -6,11 +6,29 @@
  */
 
 import { Widget } from '@phosphor/widgets';
-import { Disposable } from '@theia/core';
+import { Disposable, Event } from '@theia/core';
 
 /**
- * Terminal model describes interfaces for creation and using terminal widget.
+ * Terminal UI widget.
  */
+export const TerminalWidget = Symbol('TerminalWidget');
+export interface TerminalWidget extends Disposable, Widget {
+    /**
+     * Start terminal and return terminal id.
+     */
+    start(): Promise<number>;
+
+    /**
+     * Send text to the terminal server.
+     * @param text - text content.
+     */
+    sendText(text: string): void;
+
+    /**
+     * Event which fires when terminal did closed. Event value contains closed terminal widget definition.
+     */
+    onTerminalDidClose: Event<TerminalWidget>;
+}
 
 /**
  * Terminal widget options.
@@ -60,27 +78,4 @@ export interface TerminalWidgetOptions {
      * Terminal id. Should be unique for all DOM.
      */
     readonly id?: string;
-}
-
-/**
- * Terminal UI widget.
- */
-export const TerminalWidget = Symbol('TerminalWidget');
-export interface TerminalWidget extends Disposable, Widget {
-    /**
-     * Start terminal and return terminal id.
-     */
-    start(): Promise<number>;
-
-    /**
-     * Send text to the terminal server.
-     * @param text - text content.
-     */
-    sendText(text: string): void;
-
-    /**
-     * Apply disposable object where are described actions to do when terminal is closed.
-     * @param dispose - disposable actions.
-     */
-    onDidClosed(dispose: Disposable): void;
 }
