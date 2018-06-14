@@ -16,19 +16,39 @@ import {
 } from '@theia/core/lib/common';
 import {
     CommonMenus, ApplicationShell, KeybindingContribution, KeyCode, Key,
-    KeyModifier, KeybindingRegistry, Widget
+    KeyModifier, KeybindingRegistry
 } from '@theia/core/lib/browser';
 import { WidgetManager } from '@theia/core/lib/browser';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
 import { TERMINAL_WIDGET_FACTORY_ID, TerminalWidgetFactoryOptions, TerminalWidgetImpl } from './terminal-widget';
 import { TerminalKeybindingContexts } from "./terminal-keybinding-contexts";
-import { TerminalService } from '@theia/core/lib/browser/terminal/terminal-service';
-import { TerminalWidgetOptions, TerminalWidget } from '@theia/core/lib/browser/terminal/terminal-model';
+import { TerminalService } from './base/terminal-service';
+import { TerminalWidgetOptions, TerminalWidget } from './base/terminal-model';
 
 export namespace TerminalCommands {
     export const NEW: Command = {
         id: 'terminal:new',
         label: 'Open New Terminal'
+    };
+
+    export const NEW_TERM_WITH_ENV: Command = {
+        id: 'terminal:new:with:env',
+        label: 'New Terminal with env'
+    };
+
+    export const NEW_TERM_OPEN_WITH_DELAY: Command = {
+        id: 'terminal:open:new:terminal:with:delay',
+        label: 'Open new terminal with delay 2 second'
+    };
+
+    export const NEW_TERM_OPEN_WITH_CWD: Command = {
+        id: 'terminal:open:new:terminal:with:cwd',
+        label: 'Open new terminal with CWD'
+    };
+
+    export const NEW_TERM_OPEN_WITH_SHELL_PATH: Command = {
+        id: 'terminal:open:new:terminal:with:shell:path',
+        label: 'Open new terminal with shell path'
     };
 }
 
@@ -47,6 +67,45 @@ export class TerminalFrontendContribution implements TerminalService, CommandCon
             isEnabled: () => true,
             execute: async () => {
                 const termWidget = await this.newTerminal({});
+                termWidget.start();
+                this.activateWidget(termWidget);
+            }
+        });
+
+        commands.registerCommand(TerminalCommands.NEW_TERM_WITH_ENV);
+        commands.registerHandler(TerminalCommands.NEW_TERM_WITH_ENV.id, {
+            isEnabled: () => true,
+            execute: async () => {
+                const termWidget = await this.newTerminal({env: {"TEST": "HELLO THEIA!"}});
+                termWidget.start();
+                this.activateWidget(termWidget);
+            }
+        });
+
+        commands.registerCommand(TerminalCommands.NEW_TERM_OPEN_WITH_DELAY, {
+            isEnabled: () => true,
+            execute: async () => {
+                const termWidget = await this.newTerminal({});
+                termWidget.start();
+                setTimeout(() => {
+                    this.activateWidget(termWidget);
+                }, 5000);
+            }
+        });
+
+        commands.registerCommand(TerminalCommands.NEW_TERM_OPEN_WITH_CWD, {
+            isEnabled: () => true,
+            execute: async () => {
+                const termWidget = await this.newTerminal({cwd: "/home/user/projects/che"});
+                termWidget.start();
+                this.activateWidget(termWidget);
+            }
+        });
+
+        commands.registerCommand(TerminalCommands.NEW_TERM_OPEN_WITH_SHELL_PATH, {
+            isEnabled: () => true,
+            execute: async () => {
+                const termWidget = await this.newTerminal({shellPath: "sh"});
                 termWidget.start();
                 this.activateWidget(termWidget);
             }
@@ -150,7 +209,7 @@ export class TerminalFrontendContribution implements TerminalService, CommandCon
         }
     }
 
-    public async newTerminal(options: TerminalWidgetOptions): Promise<TerminalWidget & Widget> {
+    async newTerminal(options: TerminalWidgetOptions): Promise<TerminalWidget> {
         const widget = <TerminalWidgetImpl>await this.widgetManager.getOrCreateWidget(TERMINAL_WIDGET_FACTORY_ID, <TerminalWidgetFactoryOptions>{
             created: new Date().toString(),
             ...options
@@ -158,14 +217,18 @@ export class TerminalFrontendContribution implements TerminalService, CommandCon
         return widget;
     }
 
-    public activateWidget(widget: TerminalWidget & Widget): void {
-        this.shell.addWidget(widget, { area: 'bottom' });
-        this.shell.activateWidget(widget.id);
-    }
-
-    public collapseWidget(termWidget: TerminalWidget & Widget): void {
-        if (termWidget.isVisible) {
-            this.shell.collapsePanel('bottom');
+    activateWidget(widget: TerminalWidget): void {
+        const tabBar = this.shell.getTabBarFor(widget);
+        if (!tabBar) {
+            this.shell.expandPanel("bottom");
+            this.shell.addWidget(widget, { area: 'bottom' });
+            this.shell.activateWidget(widget.id);
         }
     }
+
+    // collapseWidget(termWidget: TerminalWidget & Widget): void {
+    //     if (termWidget.isVisible) {
+    //         this.shell.collapsePanel('bottom');
+    //     }
+    // }
 }

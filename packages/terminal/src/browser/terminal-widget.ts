@@ -16,7 +16,7 @@ import { terminalsPath } from '../common/terminal-protocol';
 import { IBaseTerminalServer } from '../common/base-terminal-protocol';
 import { TerminalWatcher } from '../common/terminal-watcher';
 import { ThemeService } from "@theia/core/lib/browser/theming";
-import { TerminalWidgetOptions, TerminalWidget } from '@theia/core/lib/browser/terminal/terminal-model';
+import { TerminalWidgetOptions, TerminalWidget } from './base/terminal-model';
 
 export const TERMINAL_WIDGET_FACTORY_ID = 'terminal';
 
@@ -203,13 +203,16 @@ export class TerminalWidgetImpl extends BaseWidget implements TerminalWidget, St
     /**
      * Create a new shell terminal in the back-end and attach it to a
      * new terminal widget.
-     * If id is provided attach to the terminal for this id.
+     * If id is provided attach to the terminal for this id. Value -1 indicate error.
      */
     async start(id?: number): Promise<number> {
         this.terminalId = typeof id !== 'number' ? await this.createTerminal() : await this.attachTerminal(id);
         this.resizeTerminalProcess();
         this.connectTerminalProcess();
-        return this.terminalId || Promise.reject(-1);
+        if (this.terminalId) {
+            return this.terminalId;
+        }
+        return Promise.reject(undefined);
     }
 
     protected async attachTerminal(id: number): Promise<number | undefined> {
@@ -236,7 +239,7 @@ export class TerminalWidgetImpl extends BaseWidget implements TerminalWidget, St
             rootURI,
             cols,
             rows
-       });
+        });
         if (IBaseTerminalServer.validateId(terminalId)) {
             return terminalId;
         }

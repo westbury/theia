@@ -23,9 +23,9 @@ export interface TerminalService {
      */
     activateWidget(termWidget: TerminalWidget): void;
 
-    /**
-     * Hide panel where is located created terminal widget.
-     * @param termWidget - terminal widget to hide.
-     */
-    collapseWidget(termWidget: TerminalWidget): void;
+    // /**
+    //  * Hide panel where is located created terminal widget.
+    //  * @param termWidget - terminal widget to hide.
+    //  */
+    // collapseWidget(termWidget: TerminalWidget): void;
 }

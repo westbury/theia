@@ -5,7 +5,8 @@
  * You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
  */
 
-import { Disposable } from '../../common';
+import { Widget } from '@phosphor/widgets';
+import { Disposable } from '@theia/core';
 
 /**
  * Terminal model describes interfaces for creation and using terminal widget.
@@ -65,7 +66,7 @@ export interface TerminalWidgetOptions {
  * Terminal UI widget.
  */
 export const TerminalWidget = Symbol('TerminalWidget');
-export interface TerminalWidget extends Disposable {
+export interface TerminalWidget extends Disposable, Widget {
     /**
      * Start terminal and return terminal id.
      */

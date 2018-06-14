@@ -10,13 +10,13 @@ import { CommandContribution, MenuContribution } from '@theia/core/lib/common';
 import { KeybindingContribution, WebSocketConnectionProvider, WidgetFactory, KeybindingContext } from '@theia/core/lib/browser';
 import { TerminalFrontendContribution } from './terminal-frontend-contribution';
 import { TerminalWidgetImpl, TERMINAL_WIDGET_FACTORY_ID } from './terminal-widget';
-import { TerminalWidget, TerminalWidgetOptions } from '@theia/core/lib/browser/terminal/terminal-model';
+import { TerminalWidget, TerminalWidgetOptions } from './base/terminal-model';
 import { ITerminalServer, terminalPath } from '../common/terminal-protocol';
 import { TerminalWatcher } from '../common/terminal-watcher';
 import { IShellTerminalServer, shellTerminalPath, ShellTerminalServerProxy } from '../common/shell-terminal-protocol';
 import { TerminalActiveContext } from './terminal-keybinding-contexts';
 import { createCommonBindings } from '../common/terminal-common-module';
-import { TerminalService } from "@theia/core/lib/browser/terminal/terminal-service";
+import { TerminalService } from "./base/terminal-service";
 
 import '../../src/browser/terminal.css';
 import 'xterm/lib/xterm.css';
