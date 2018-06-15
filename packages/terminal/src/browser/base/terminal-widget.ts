@@ -59,7 +59,7 @@ export interface TerminalWidgetOptions {
     /**
      * Environment variables for terminal.
      */
-    readonly env?: { [key: string]: string | null };
+    readonly env?: { [key: string]: string | undefined };
 
     /**
      * In case `destroyTermOnClose` is true - terminal process will be destroyed on close terminal widget, otherwise will be kept

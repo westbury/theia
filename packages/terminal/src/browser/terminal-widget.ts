@@ -137,18 +137,15 @@ export class TerminalWidgetImpl extends BaseWidget implements TerminalWidget, St
 
     storeState(): object {
         this.closeOnDispose = false;
-        return { terminalId: this.terminalId, titleLabel: this.title.label }; // , rows: this.term.rows, cols: this.term.cols
+        return { terminalId: this.terminalId, titleLabel: this.title.label };
     }
 
     restoreState(oldState: object) {
         if (this.restored === false) {
-            const state = oldState as { terminalId: number, titleLabel: string, rows: number, cols: number };
+            const state = oldState as { terminalId: number, titleLabel: string };
             /* This is a workaround to issue #879 */
             this.restored = true;
             this.title.label = state.titleLabel;
-            // this.term.cols = state.cols;
-            // this.term.rows = state.rows;
-            this.term.resize(state.cols, state.rows);
             this.start(state.terminalId);
         }
     }

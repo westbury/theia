@@ -152,7 +152,7 @@ export class TerminalFrontendContribution implements TerminalService, CommandCon
         commands.registerCommand(TerminalCommands.NEW_TERM_WITH_NULL_VALUE_ENV, {
             isEnabled: () => true,
             execute: async () => {
-                const termWidget = await this.newTerminal({env: {"TEST": ""}});
+                const termWidget = await this.newTerminal({env: {"TEST": undefined}});
                 termWidget.start();
                 this.activateWidget(termWidget);
             }
