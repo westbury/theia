@@ -30,41 +30,6 @@ export namespace TerminalCommands {
         id: 'terminal:new',
         label: 'Open New Terminal'
     };
-
-    export const NEW_TERM_WITH_ENV: Command = {
-        id: 'terminal:new:with:env',
-        label: 'New Terminal with env'
-    };
-
-    export const NEW_TERM_OPEN_WITH_DELAY: Command = {
-        id: 'terminal:open:new:terminal:with:delay',
-        label: 'Open new terminal with delay 5 second'
-    };
-
-    export const NEW_TERM_OPEN_WITH_CWD: Command = {
-        id: 'terminal:open:new:terminal:with:cwd',
-        label: 'Open new terminal with CWD'
-    };
-
-    export const NEW_TERM_OPEN_WITH_SHELL_PATH: Command = {
-        id: 'terminal:open:new:terminal:with:shell:path',
-        label: 'Open new terminal with shell path'
-    };
-
-    export const NEW_TERM_OPEN_WITH_REACTION_ON_CLOSE_EVENT: Command = {
-        id: 'terminal:open:new:terminal:with:reaction:on:close:event',
-        label: 'Open new terminal with reaction on close event'
-    };
-
-    export const NEW_TERM_OPEN_WITH_TEXT: Command = {
-        id: 'terminal:open:new:terminal:with:text',
-        label: 'Open new terminal and send text'
-    };
-
-    export const NEW_TERM_WITH_NULL_VALUE_ENV: Command = {
-        id: 'terminal:new:with:null:value:env',
-        label: 'New Terminal with null value env'
-    };
 }
 
 @injectable()
@@ -82,77 +47,6 @@ export class TerminalFrontendContribution implements TerminalService, CommandCon
             isEnabled: () => true,
             execute: async () => {
                 const termWidget = await this.newTerminal({});
-                termWidget.start();
-                this.activateWidget(termWidget);
-            }
-        });
-
-        commands.registerCommand(TerminalCommands.NEW_TERM_WITH_ENV);
-        commands.registerHandler(TerminalCommands.NEW_TERM_WITH_ENV.id, {
-            isEnabled: () => true,
-            execute: async () => {
-                const termWidget = await this.newTerminal({ env: { "TEST": "HELLO THEIA!" } });
-                termWidget.start();
-                this.activateWidget(termWidget);
-            }
-        });
-
-        commands.registerCommand(TerminalCommands.NEW_TERM_OPEN_WITH_DELAY, {
-            isEnabled: () => true,
-            execute: async () => {
-                const termWidget = await this.newTerminal({});
-                termWidget.start();
-                setTimeout(() => {
-                    this.activateWidget(termWidget);
-                }, 5000);
-            }
-        });
-
-        commands.registerCommand(TerminalCommands.NEW_TERM_OPEN_WITH_CWD, {
-            isEnabled: () => true,
-            execute: async () => {
-                const termWidget = await this.newTerminal({ cwd: "/home/user/projects/che" });
-                termWidget.start();
-                this.activateWidget(termWidget);
-            }
-        });
-
-        commands.registerCommand(TerminalCommands.NEW_TERM_OPEN_WITH_SHELL_PATH, {
-            isEnabled: () => true,
-            execute: async () => {
-                const termWidget = await this.newTerminal({ shellPath: "sh" });
-                termWidget.start();
-                this.activateWidget(termWidget);
-            }
-        });
-
-        commands.registerCommand(TerminalCommands.NEW_TERM_OPEN_WITH_REACTION_ON_CLOSE_EVENT, {
-            isEnabled: () => true,
-            execute: async () => {
-                const termWidget = await this.newTerminal({});
-                termWidget.onTerminalDidClose(terminal => {
-                    console.log(terminal, "was closed");
-                });
-                termWidget.start();
-                this.activateWidget(termWidget);
-            }
-        });
-
-        // todo
-        commands.registerCommand(TerminalCommands.NEW_TERM_OPEN_WITH_TEXT, {
-            isEnabled: () => true,
-            execute: async () => {
-                const termWidget = await this.newTerminal({});
-                await termWidget.start();
-                termWidget.sendText("Hello Theia");
-                this.activateWidget(termWidget);
-            }
-        });
-
-        commands.registerCommand(TerminalCommands.NEW_TERM_WITH_NULL_VALUE_ENV, {
-            isEnabled: () => true,
-            execute: async () => {
-                const termWidget = await this.newTerminal({ env: { "TEST": null, "TEST2": "W" } });
                 termWidget.start();
                 this.activateWidget(termWidget);
             }
