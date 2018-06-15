@@ -37,7 +37,7 @@ export default new ContainerModule(bind => {
             const domId = options.id || 'terminal-' + counter;
             const widgetOptions: TerminalWidgetOptions = {
                 title: 'Terminal ' + counter,
-                overrideTitle: true,
+                useServerTitle: true,
                 destroyTermOnClose: true,
                 ...options
             };

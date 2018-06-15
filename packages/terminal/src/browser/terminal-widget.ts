@@ -106,7 +106,7 @@ export class TerminalWidgetImpl extends BaseWidget implements TerminalWidget, St
         }));
 
         this.term.on('title', (title: string) => {
-            if (this.options.overrideTitle) {
+            if (this.options.useServerTitle) {
                 this.title.label = title;
             }
         });

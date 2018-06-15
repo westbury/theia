@@ -69,10 +69,9 @@ export interface TerminalWidgetOptions {
 
     /**
      * Terminal server side can send to the client `terminal title` to display this value on the UI. If
-     * overrideTitle = true, we skip this title and use our own custom title, defined by 'title' argument.
-     * If overrideTitle = false, we are using terminal title from the server side.
+     * useServerTitle = true then display this title, otherwise display title defined by 'title' argument.
      */
-    readonly overrideTitle?: boolean;
+    readonly useServerTitle?: boolean;
 
     /**
      * Terminal id. Should be unique for all DOM.
