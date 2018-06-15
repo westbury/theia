@@ -6,13 +6,13 @@
  */
 
 import { Widget } from '@phosphor/widgets';
-import { Disposable, Event } from '@theia/core';
+import { Event } from '@theia/core';
 
 /**
  * Terminal UI widget.
  */
 export const TerminalWidget = Symbol('TerminalWidget');
-export interface TerminalWidget extends Disposable, Widget {
+export interface TerminalWidget extends Widget {
     /**
      * Start terminal and return terminal id.
      */
