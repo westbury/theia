@@ -17,6 +17,8 @@ import { IBaseTerminalServer } from '../common/base-terminal-protocol';
 import { TerminalWatcher } from '../common/terminal-watcher';
 import { ThemeService } from "@theia/core/lib/browser/theming";
 import { TerminalWidgetOptions, TerminalWidget } from './base/terminal-widget';
+import { MessageConnection } from 'vscode-jsonrpc';
+import { Deferred } from "@theia/core/lib/common/promise-util";
 
 export const TERMINAL_WIDGET_FACTORY_ID = 'terminal';
 
@@ -51,6 +53,8 @@ export class TerminalWidgetImpl extends BaseWidget implements TerminalWidget, St
     protected closeOnDispose = true;
     private readonly TERMINAL = "Terminal";
     private readonly onTermDidClose = new Emitter<TerminalWidget>();
+
+    protected waitForConnection: Deferred<MessageConnection>;
 
     @inject(WorkspaceService) protected readonly workspaceService: WorkspaceService;
     @inject(WebSocketConnectionProvider) protected readonly webSocketConnectionProvider: WebSocketConnectionProvider;
@@ -308,6 +312,7 @@ export class TerminalWidgetImpl extends BaseWidget implements TerminalWidget, St
         }
         this.toDisposeOnConnect.dispose();
         this.toDispose.push(this.toDisposeOnConnect);
+        this.waitForConnection = new Deferred<MessageConnection>();
         this.webSocketConnectionProvider.listen({
             path: `${terminalsPath}/${this.terminalId}`,
             onConnection: connection => {
@@ -319,8 +324,7 @@ export class TerminalWidgetImpl extends BaseWidget implements TerminalWidget, St
 
                 this.toDisposeOnConnect.push(connection);
                 connection.listen();
-                // this.waitForConnection.resolve();
-                // this.connection = connection;
+                this.waitForConnection.resolve(connection);
             }
         }, { reconnecting: false });
     }
@@ -330,11 +334,12 @@ export class TerminalWidgetImpl extends BaseWidget implements TerminalWidget, St
         }
     }
 
-    // todo
     sendText(text: string): void {
-        // this.waitForConnection.promise.then(() => {
-        //     this.connection.sendRequest('write', text);
-        // });
+        if (this.waitForConnection) {
+             this.waitForConnection.promise.then(connection => {
+                connection.sendRequest('write', text);
+            });
+        }
     }
 
     get onTerminalDidClose(): Event<TerminalWidget> {

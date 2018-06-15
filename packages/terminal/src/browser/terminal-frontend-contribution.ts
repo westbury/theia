@@ -38,7 +38,7 @@ export namespace TerminalCommands {
 
     export const NEW_TERM_OPEN_WITH_DELAY: Command = {
         id: 'terminal:open:new:terminal:with:delay',
-        label: 'Open new terminal with delay 2 second'
+        label: 'Open new terminal with delay 5 second'
     };
 
     export const NEW_TERM_OPEN_WITH_CWD: Command = {
@@ -54,6 +54,16 @@ export namespace TerminalCommands {
     export const NEW_TERM_OPEN_WITH_REACTION_ON_CLOSE_EVENT: Command = {
         id: 'terminal:open:new:terminal:with:reaction:on:close:event',
         label: 'Open new terminal with reaction on close event'
+    };
+
+    export const NEW_TERM_OPEN_WITH_TEXT: Command = {
+        id: 'terminal:open:new:terminal:with:text',
+        label: 'Open new terminal and send text'
+    };
+
+    export const NEW_TERM_WITH_NULL_VALUE_ENV: Command = {
+        id: 'terminal:new:with:null:value:env',
+        label: 'New Terminal with null value env'
     };
 }
 
@@ -123,6 +133,26 @@ export class TerminalFrontendContribution implements TerminalService, CommandCon
                 termWidget.onTerminalDidClose(terminal => {
                     console.log(terminal, "was closed");
                 });
+                termWidget.start();
+                this.activateWidget(termWidget);
+            }
+        });
+
+        // todo
+        commands.registerCommand(TerminalCommands.NEW_TERM_OPEN_WITH_TEXT, {
+            isEnabled: () => true,
+            execute: async () => {
+                const termWidget = await this.newTerminal({});
+                await termWidget.start();
+                termWidget.sendText("Hello Theia");
+                this.activateWidget(termWidget);
+            }
+        });
+
+        commands.registerCommand(TerminalCommands.NEW_TERM_WITH_NULL_VALUE_ENV, {
+            isEnabled: () => true,
+            execute: async () => {
+                const termWidget = await this.newTerminal({env: {"TEST": ""}});
                 termWidget.start();
                 this.activateWidget(termWidget);
             }
@@ -242,10 +272,4 @@ export class TerminalFrontendContribution implements TerminalService, CommandCon
             this.shell.activateWidget(widget.id);
         }
     }
-
-    // collapseWidget(termWidget: TerminalWidget & Widget): void {
-    //     if (termWidget.isVisible) {
-    //         this.shell.collapsePanel('bottom');
-    //     }
-    // }
 }
