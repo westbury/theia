@@ -20,7 +20,7 @@ import {
 } from '@theia/core/lib/browser';
 import { WidgetManager } from '@theia/core/lib/browser';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
-import { TERMINAL_WIDGET_FACTORY_ID, TerminalWidgetFactoryOptions, TerminalWidgetImpl } from './terminal-widget';
+import { TERMINAL_WIDGET_FACTORY_ID, TerminalWidgetFactoryOptions, TerminalWidgetImpl } from './terminal-widget-impl';
 import { TerminalKeybindingContexts } from "./terminal-keybinding-contexts";
 import { TerminalService } from './base/terminal-service';
 import { TerminalWidgetOptions, TerminalWidget } from './base/terminal-widget';
@@ -91,7 +91,7 @@ export class TerminalFrontendContribution implements TerminalService, CommandCon
         commands.registerHandler(TerminalCommands.NEW_TERM_WITH_ENV.id, {
             isEnabled: () => true,
             execute: async () => {
-                const termWidget = await this.newTerminal({env: {"TEST": "HELLO THEIA!"}});
+                const termWidget = await this.newTerminal({ env: { "TEST": "HELLO THEIA!" } });
                 termWidget.start();
                 this.activateWidget(termWidget);
             }
@@ -111,7 +111,7 @@ export class TerminalFrontendContribution implements TerminalService, CommandCon
         commands.registerCommand(TerminalCommands.NEW_TERM_OPEN_WITH_CWD, {
             isEnabled: () => true,
             execute: async () => {
-                const termWidget = await this.newTerminal({cwd: "/home/user/projects/che"});
+                const termWidget = await this.newTerminal({ cwd: "/home/user/projects/che" });
                 termWidget.start();
                 this.activateWidget(termWidget);
             }
@@ -120,7 +120,7 @@ export class TerminalFrontendContribution implements TerminalService, CommandCon
         commands.registerCommand(TerminalCommands.NEW_TERM_OPEN_WITH_SHELL_PATH, {
             isEnabled: () => true,
             execute: async () => {
-                const termWidget = await this.newTerminal({shellPath: "sh"});
+                const termWidget = await this.newTerminal({ shellPath: "sh" });
                 termWidget.start();
                 this.activateWidget(termWidget);
             }
@@ -152,7 +152,7 @@ export class TerminalFrontendContribution implements TerminalService, CommandCon
         commands.registerCommand(TerminalCommands.NEW_TERM_WITH_NULL_VALUE_ENV, {
             isEnabled: () => true,
             execute: async () => {
-                const termWidget = await this.newTerminal({env: {"TEST": null, "TEST2": "W"}});
+                const termWidget = await this.newTerminal({ env: { "TEST": null, "TEST2": "W" } });
                 termWidget.start();
                 this.activateWidget(termWidget);
             }
@@ -267,7 +267,7 @@ export class TerminalFrontendContribution implements TerminalService, CommandCon
     activateWidget(widget: TerminalWidget): void {
         const tabBar = this.shell.getTabBarFor(widget);
         if (!tabBar) {
-            this.shell.expandPanel("bottom");
+            this.shell.expandPanel('bottom');
             this.shell.addWidget(widget, { area: 'bottom' });
             this.shell.activateWidget(widget.id);
         }

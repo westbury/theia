@@ -18,8 +18,8 @@ export interface TerminalService {
     newTerminal(options: TerminalWidgetOptions): Promise<TerminalWidget>;
 
     /**
-     * Display new terminal widget on the bottom panel.
-     * @param termWidget - widget to attach to the bottom panel.
+     * Display new terminal widget.
+     * @param termWidget - widget to attach.
      */
     activateWidget(termWidget: TerminalWidget): void;
 }
