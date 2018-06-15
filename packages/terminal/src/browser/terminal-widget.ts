@@ -49,11 +49,10 @@ export class TerminalWidgetImpl extends BaseWidget implements TerminalWidget, St
 
     private terminalId: number | undefined;
     private term: Xterm.Terminal;
-    protected restored = false;
-    protected closeOnDispose = true;
     private readonly TERMINAL = "Terminal";
     private readonly onTermDidClose = new Emitter<TerminalWidget>();
-
+    protected restored = false;
+    protected closeOnDispose = true;
     protected waitForConnection: Deferred<MessageConnection>;
 
     @inject(WorkspaceService) protected readonly workspaceService: WorkspaceService;
@@ -115,7 +114,6 @@ export class TerminalWidgetImpl extends BaseWidget implements TerminalWidget, St
         this.toDispose.push(this.terminalWatcher.onTerminalError(({ terminalId }) => {
             if (terminalId === this.terminalId) {
                 this.title.label = "<terminal error>";
-                console.log("error");
             }
         }));
         this.toDispose.push(this.terminalWatcher.onTerminalExit(({ terminalId }) => {
@@ -206,7 +204,7 @@ export class TerminalWidgetImpl extends BaseWidget implements TerminalWidget, St
     /**
      * Create a new shell terminal in the back-end and attach it to a
      * new terminal widget.
-     * If id is provided attach to the terminal for this id. Value -1 indicate error.
+     * If id is provided attach to the terminal for this id.
      */
     async start(id?: number): Promise<number> {
         this.terminalId = typeof id !== 'number' ? await this.createTerminal() : await this.attachTerminal(id);
