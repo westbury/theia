@@ -9,7 +9,7 @@ import { inject, injectable, named } from "inversify";
 import { ILogger } from '@theia/core/lib/common';
 import { FrontendApplication, ApplicationShell } from '@theia/core/lib/browser';
 import { TaskServer, TaskExitedEvent, TaskOptions, TaskInfo } from '../common/task-protocol';
-import { TERMINAL_WIDGET_FACTORY_ID, TerminalWidgetFactoryOptions, TerminalWidgetImpl } from '@theia/terminal/lib/browser/terminal-widget-impl';
+import { TERMINAL_WIDGET_FACTORY_ID, TerminalWidgetFactoryOptions, TerminalWidget } from '@theia/terminal/lib/browser/terminal-widget-impl';
 import { WidgetManager } from '@theia/core/lib/browser/widget-manager';
 import { TaskWatcher } from '../common/task-watcher';
 import { MessageService } from '@theia/core/lib/common/message-service';
@@ -158,7 +158,7 @@ export class TaskService implements TaskConfigurationClient {
 
     async attach(terminalId: number, taskId: number): Promise<void> {
         // create terminal widget to display task's execution output
-        const widget = <TerminalWidgetImpl>await this.widgetManager.getOrCreateWidget(
+        const widget = <TerminalWidget>await this.widgetManager.getOrCreateWidget(
             TERMINAL_WIDGET_FACTORY_ID,
             <TerminalWidgetFactoryOptions>{
                 created: new Date().toString(),
