@@ -21,5 +21,5 @@ export interface TerminalService {
      * Display new terminal widget.
      * @param termWidget - widget to attach.
      */
-    activateWidget(termWidget: TerminalWidget): void;
+    activateTerminal(termWidget: TerminalWidget): void;
 }

@@ -20,7 +20,7 @@ import {
 } from '@theia/core/lib/browser';
 import { WidgetManager } from '@theia/core/lib/browser';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
-import { TERMINAL_WIDGET_FACTORY_ID, TerminalWidgetFactoryOptions, TerminalWidgetImpl } from './terminal-widget-impl';
+import { TERMINAL_WIDGET_FACTORY_ID, TerminalWidgetFactoryOptions } from './terminal-widget-impl';
 import { TerminalKeybindingContexts } from "./terminal-keybinding-contexts";
 import { TerminalService } from './base/terminal-service';
 import { TerminalWidgetOptions, TerminalWidget } from './base/terminal-widget';
@@ -48,7 +48,7 @@ export class TerminalFrontendContribution implements TerminalService, CommandCon
             execute: async () => {
                 const termWidget = await this.newTerminal({});
                 termWidget.start();
-                this.activateWidget(termWidget);
+                this.activateTerminal(termWidget);
             }
         });
     }
@@ -151,19 +151,18 @@ export class TerminalFrontendContribution implements TerminalService, CommandCon
     }
 
     async newTerminal(options: TerminalWidgetOptions): Promise<TerminalWidget> {
-        const widget = <TerminalWidgetImpl>await this.widgetManager.getOrCreateWidget(TERMINAL_WIDGET_FACTORY_ID, <TerminalWidgetFactoryOptions>{
+        const widget = <TerminalWidget>await this.widgetManager.getOrCreateWidget(TERMINAL_WIDGET_FACTORY_ID, <TerminalWidgetFactoryOptions>{
             created: new Date().toString(),
             ...options
         });
         return widget;
     }
 
-    activateWidget(widget: TerminalWidget): void {
+    activateTerminal(widget: TerminalWidget): void {
         const tabBar = this.shell.getTabBarFor(widget);
         if (!tabBar) {
-            this.shell.expandPanel('bottom');
             this.shell.addWidget(widget, { area: 'bottom' });
-            this.shell.activateWidget(widget.id);
         }
+        this.shell.activateWidget(widget.id);
     }
 }

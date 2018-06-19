@@ -49,7 +49,7 @@ export default new ContainerModule(bind => {
     }));
 
     bind(TerminalFrontendContribution).toSelf().inSingletonScope();
-    bind(TerminalService).to(TerminalFrontendContribution).inSingletonScope();
+    bind(TerminalService).toService(TerminalFrontendContribution);
     for (const identifier of [CommandContribution, MenuContribution, KeybindingContribution]) {
         bind(identifier).toService(TerminalFrontendContribution);
     }

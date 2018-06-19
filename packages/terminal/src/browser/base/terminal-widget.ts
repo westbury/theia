@@ -30,6 +30,19 @@ export interface TerminalWidget extends Widget {
     onTerminalDidClose: Event<TerminalWidget>;
 }
 
+export function isTerminalWidget(widget: Widget | undefined): widget is TerminalWidget {
+    if (!widget) {
+        return false;
+    }
+
+    const widgetToCheck = <TerminalWidget>widget;
+    if (widgetToCheck.start && widgetToCheck.sendText && widgetToCheck.onTerminalDidClose) {
+        return true;
+    }
+
+    return false;
+}
+
 /**
  * Terminal widget options.
  */

@@ -53,7 +53,7 @@ export class TerminalWidgetImpl extends BaseWidget implements TerminalWidget, St
     private readonly onTermDidClose = new Emitter<TerminalWidget>();
     protected restored = false;
     protected closeOnDispose = true;
-    protected waitForConnection: Deferred<MessageConnection>;
+    protected waitForConnection: Deferred<MessageConnection | undefined>;
 
     @inject(WorkspaceService) protected readonly workspaceService: WorkspaceService;
     @inject(WebSocketConnectionProvider) protected readonly webSocketConnectionProvider: WebSocketConnectionProvider;
@@ -131,6 +131,7 @@ export class TerminalWidgetImpl extends BaseWidget implements TerminalWidget, St
             });
             this.toDispose.push(disposable);
         }));
+        this.toDispose.push(this.onTermDidClose);
     }
 
     storeState(): object {
@@ -213,7 +214,7 @@ export class TerminalWidgetImpl extends BaseWidget implements TerminalWidget, St
         if (this.terminalId) {
             return this.terminalId;
         }
-        return Promise.reject(undefined);
+        throw new Error('Failed to start terminal' + (id ? ` for id: ${id}.` : `.`));
     }
 
     protected async attachTerminal(id: number): Promise<number | undefined> {
@@ -307,7 +308,7 @@ export class TerminalWidgetImpl extends BaseWidget implements TerminalWidget, St
         }
         this.toDisposeOnConnect.dispose();
         this.toDispose.push(this.toDisposeOnConnect);
-        this.waitForConnection = new Deferred<MessageConnection>();
+        this.waitForConnection = new Deferred<MessageConnection | undefined>();
         this.webSocketConnectionProvider.listen({
             path: `${terminalsPath}/${this.terminalId}`,
             onConnection: connection => {
@@ -332,7 +333,9 @@ export class TerminalWidgetImpl extends BaseWidget implements TerminalWidget, St
     sendText(text: string): void {
         if (this.waitForConnection) {
              this.waitForConnection.promise.then(connection => {
-                connection.sendRequest('write', text);
+                if (connection) {
+                    connection.sendRequest('write', text);
+                }
             });
         }
     }
