@@ -15,8 +15,9 @@ export const TerminalWidget = Symbol('TerminalWidget');
 export interface TerminalWidget extends Widget {
     /**
      * Start terminal and return terminal id.
+     * @param id - terminal id.
      */
-    start(): Promise<number>;
+    start(id?: number): Promise<number>;
 
     /**
      * Send text to the terminal server.
