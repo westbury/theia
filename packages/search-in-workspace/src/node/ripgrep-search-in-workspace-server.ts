@@ -250,7 +250,7 @@ export class RipgrepSearchInWorkspaceServer implements SearchInWorkspaceServer {
                 }
 
                 const result: SearchInWorkspaceResult = {
-                    file: filename,
+                    fileUri: FileUri.create(filename).toString(),
                     line: line,
                     character: characterNum,
                     length: matchWeAreLookingFor[1].length,

@@ -25,7 +25,8 @@ import { ILogger, isWindows } from '@theia/core';
 import { MockLogger } from '@theia/core/lib/common/test/mock-logger';
 import { RawProcessFactory, RawProcessOptions, RawProcess, ProcessManager } from '@theia/process/lib/node';
 import * as path from 'path';
-import { FileUri } from '@theia/core/lib/node/file-uri';
+import { FileUri } from '@theia/core/src/node';
+// import { FileUri } from '@theia/core/lib/node/file-uri';
 
 // Allow creating temporary files, but remove them when we are done.
 const track = temp.track();
@@ -166,11 +167,13 @@ function compareSearchResults(expected: SearchInWorkspaceResult[], actual: Searc
         const a = actual[i];
         const e = expected[i];
 
-        const lines = fileLines.get(e.file);
+        const ePath = FileUri.fsPath(e.fileUri);
+        const lines = fileLines.get(ePath);
         if (lines) {
             const line = lines[e.line - 1];
             e.lineText = line;
-            e.file = FileUri.fsPath(path.join(rootDir, e.file));
+            // e.file = FileUri.fsPath(path.join(rootDir, e.file));
+            e.fileUri = FileUri.create(path.join(rootDir, ePath)).toString();
 
             expect(a).deep.eq(e);
         } else {
@@ -189,13 +192,13 @@ describe('ripgrep-search-in-workspace-server', function () {
 
         const client = new ResultAccumulator(() => {
             const expected: SearchInWorkspaceResult[] = [
-                { file: 'carrots', line: 1, character: 11, length: pattern.length, lineText: '' },
-                { file: 'carrots', line: 2, character: 6, length: pattern.length, lineText: '' },
-                { file: 'carrots', line: 2, character: 35, length: pattern.length, lineText: '' },
-                { file: 'carrots', line: 3, character: 28, length: pattern.length, lineText: '' },
-                { file: 'carrots', line: 3, character: 52, length: pattern.length, lineText: '' },
-                { file: 'carrots', line: 4, character: 1, length: pattern.length, lineText: '' },
-                { file: 'potatoes', line: 1, character: 18, length: pattern.length, lineText: '' }
+                { fileUri: 'carrots', line: 1, character: 11, length: pattern.length, lineText: '' },
+                { fileUri: 'carrots', line: 2, character: 6, length: pattern.length, lineText: '' },
+                { fileUri: 'carrots', line: 2, character: 35, length: pattern.length, lineText: '' },
+                { fileUri: 'carrots', line: 3, character: 28, length: pattern.length, lineText: '' },
+                { fileUri: 'carrots', line: 3, character: 52, length: pattern.length, lineText: '' },
+                { fileUri: 'carrots', line: 4, character: 1, length: pattern.length, lineText: '' },
+                { fileUri: 'potatoes', line: 1, character: 18, length: pattern.length, lineText: '' }
             ];
 
             compareSearchResults(expected, client.results);
@@ -210,11 +213,11 @@ describe('ripgrep-search-in-workspace-server', function () {
 
         const client = new ResultAccumulator(() => {
             const expected: SearchInWorkspaceResult[] = [
-                { file: 'carrots', line: 1, character: 11, length: pattern.length, lineText: '' },
-                { file: 'carrots', line: 2, character: 6, length: pattern.length, lineText: '' },
-                { file: 'carrots', line: 2, character: 35, length: pattern.length, lineText: '' },
-                { file: 'carrots', line: 3, character: 28, length: pattern.length, lineText: '' },
-                { file: 'potatoes', line: 1, character: 18, length: pattern.length, lineText: '' }
+                { fileUri: 'carrots', line: 1, character: 11, length: pattern.length, lineText: '' },
+                { fileUri: 'carrots', line: 2, character: 6, length: pattern.length, lineText: '' },
+                { fileUri: 'carrots', line: 2, character: 35, length: pattern.length, lineText: '' },
+                { fileUri: 'carrots', line: 3, character: 28, length: pattern.length, lineText: '' },
+                { fileUri: 'potatoes', line: 1, character: 18, length: pattern.length, lineText: '' }
             ];
 
             compareSearchResults(expected, client.results);
@@ -231,10 +234,10 @@ describe('ripgrep-search-in-workspace-server', function () {
 
         const client = new ResultAccumulator(() => {
             const expected: SearchInWorkspaceResult[] = [
-                { file: 'carrots', line: 1, character: 11, length: pattern.length, lineText: '' },
-                { file: 'carrots', line: 3, character: 28, length: pattern.length, lineText: '' },
-                { file: 'carrots', line: 3, character: 52, length: pattern.length, lineText: '' },
-                { file: 'carrots', line: 4, character: 1, length: pattern.length, lineText: '' }
+                { fileUri: 'carrots', line: 1, character: 11, length: pattern.length, lineText: '' },
+                { fileUri: 'carrots', line: 3, character: 28, length: pattern.length, lineText: '' },
+                { fileUri: 'carrots', line: 3, character: 52, length: pattern.length, lineText: '' },
+                { fileUri: 'carrots', line: 4, character: 1, length: pattern.length, lineText: '' }
             ];
 
             compareSearchResults(expected, client.results);
@@ -251,8 +254,8 @@ describe('ripgrep-search-in-workspace-server', function () {
 
         const client = new ResultAccumulator(() => {
             const expected: SearchInWorkspaceResult[] = [
-                { file: 'carrots', line: 1, character: 11, length: pattern.length, lineText: '' },
-                { file: 'carrots', line: 3, character: 28, length: pattern.length, lineText: '' }
+                { fileUri: 'carrots', line: 1, character: 11, length: pattern.length, lineText: '' },
+                { fileUri: 'carrots', line: 3, character: 28, length: pattern.length, lineText: '' }
             ];
 
             compareSearchResults(expected, client.results);
@@ -268,7 +271,7 @@ describe('ripgrep-search-in-workspace-server', function () {
     it('returns 1 result when searching for "Carrot"', function (done) {
         const client = new ResultAccumulator(() => {
             const expected: SearchInWorkspaceResult[] = [
-                { file: 'carrots', line: 4, character: 1, length: 6, lineText: '' },
+                { fileUri: 'carrots', line: 4, character: 1, length: 6, lineText: '' },
             ];
 
             compareSearchResults(expected, client.results);
@@ -307,7 +310,7 @@ describe('ripgrep-search-in-workspace-server', function () {
 
         const client = new ResultAccumulator(() => {
             const expected: SearchInWorkspaceResult[] = [
-                { file: 'carrots', line: 2, character: 6, length: pattern.length, lineText: '' },
+                { fileUri: 'carrots', line: 2, character: 6, length: pattern.length, lineText: '' },
             ];
 
             compareSearchResults(expected, client.results);
@@ -329,7 +332,7 @@ describe('ripgrep-search-in-workspace-server', function () {
 
             for (let i = 1; i <= 100; i++) {
                 expected.push({
-                    file: 'lots-of-matches',
+                    fileUri: 'lots-of-matches',
                     line: i,
                     character: 1,
                     length: pattern.length,
@@ -354,7 +357,7 @@ describe('ripgrep-search-in-workspace-server', function () {
 
             for (let i = 1; i <= 100; i++) {
                 expected.push({
-                    file: 'lots-of-matches',
+                    fileUri: 'lots-of-matches',
                     line: i,
                     character: 1,
                     length: pattern.length,
@@ -378,11 +381,11 @@ describe('ripgrep-search-in-workspace-server', function () {
 
         const client = new ResultAccumulator(() => {
             const expected: SearchInWorkspaceResult[] = [
-                { file: 'regexes', line: 1, character: 5, length: 5, lineText: '' },
-                { file: 'regexes', line: 1, character: 14, length: 4, lineText: '' },
-                { file: 'regexes', line: 1, character: 21, length: 5, lineText: '' },
-                { file: 'regexes', line: 1, character: 26, length: 6, lineText: '' },
-                { file: 'regexes', line: 2, character: 1, length: 5, lineText: '' },
+                { fileUri: 'regexes', line: 1, character: 5, length: 5, lineText: '' },
+                { fileUri: 'regexes', line: 1, character: 14, length: 4, lineText: '' },
+                { fileUri: 'regexes', line: 1, character: 21, length: 5, lineText: '' },
+                { fileUri: 'regexes', line: 1, character: 26, length: 6, lineText: '' },
+                { fileUri: 'regexes', line: 2, character: 1, length: 5, lineText: '' },
             ];
 
             compareSearchResults(expected, client.results);
@@ -400,7 +403,7 @@ describe('ripgrep-search-in-workspace-server', function () {
 
         const client = new ResultAccumulator(() => {
             const expected: SearchInWorkspaceResult[] = [
-                { file: 'regexes', line: 1, character: 5, length: 6, lineText: '' }
+                { fileUri: 'regexes', line: 1, character: 5, length: 6, lineText: '' }
             ];
 
             compareSearchResults(expected, client.results);
@@ -418,12 +421,12 @@ describe('ripgrep-search-in-workspace-server', function () {
 
         const client = new ResultAccumulator(() => {
             const expected: SearchInWorkspaceResult[] = [
-                { file: 'file with spaces', line: 1, character: 28, length: 7, lineText: '' },
+                { fileUri: 'file with spaces', line: 1, character: 28, length: 7, lineText: '' },
             ];
 
             if (!isWindows) {
                 expected.push(
-                    { file: 'file:with:some:colons', line: 1, character: 28, length: 7, lineText: '' }
+                    { fileUri: 'file:with:some:colons', line: 1, character: 28, length: 7, lineText: '' }
                 );
             }
 
@@ -440,12 +443,12 @@ describe('ripgrep-search-in-workspace-server', function () {
 
         const client = new ResultAccumulator(() => {
             const expected: SearchInWorkspaceResult[] = [
-                { file: 'file with spaces', line: 1, character: 27, length: 8, lineText: '' },
+                { fileUri: 'file with spaces', line: 1, character: 27, length: 8, lineText: '' },
             ];
 
             if (!isWindows) {
                 expected.push(
-                    { file: 'file:with:some:colons', line: 1, character: 27, length: 8, lineText: '' }
+                    { fileUri: 'file:with:some:colons', line: 1, character: 27, length: 8, lineText: '' }
                 );
             }
 
@@ -462,8 +465,8 @@ describe('ripgrep-search-in-workspace-server', function () {
 
         const client = new ResultAccumulator(() => {
             const expected: SearchInWorkspaceResult[] = [
-                { file: 'utf8-file', line: 1, character: 7, length: 4, lineText: '' },
-                { file: 'utf8-file', line: 1, character: 23, length: 4, lineText: '' },
+                { fileUri: 'utf8-file', line: 1, character: 7, length: 4, lineText: '' },
+                { fileUri: 'utf8-file', line: 1, character: 23, length: 4, lineText: '' },
             ];
 
             compareSearchResults(expected, client.results);
@@ -479,9 +482,9 @@ describe('ripgrep-search-in-workspace-server', function () {
 
         const client = new ResultAccumulator(() => {
             const expected: SearchInWorkspaceResult[] = [
-                { file: 'utf8-file', line: 1, character: 4, length: 3, lineText: '' },
-                { file: 'utf8-file', line: 1, character: 20, length: 3, lineText: '' },
-                { file: 'utf8-file', line: 1, character: 27, length: 4, lineText: '' },
+                { fileUri: 'utf8-file', line: 1, character: 4, length: 3, lineText: '' },
+                { fileUri: 'utf8-file', line: 1, character: 20, length: 3, lineText: '' },
+                { fileUri: 'utf8-file', line: 1, character: 27, length: 4, lineText: '' },
             ];
 
             compareSearchResults(expected, client.results);
@@ -513,7 +516,7 @@ describe('ripgrep-search-in-workspace-server', function () {
 
         const client = new ResultAccumulator(() => {
             const expected: SearchInWorkspaceResult[] = [
-                { file: 'special shell characters', line: 1, character: 14, length: 32, lineText: '' },
+                { fileUri: 'special shell characters', line: 1, character: 14, length: 32, lineText: '' },
             ];
 
             compareSearchResults(expected, client.results);
