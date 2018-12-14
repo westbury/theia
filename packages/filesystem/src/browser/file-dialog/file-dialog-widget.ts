@@ -18,6 +18,7 @@ import { injectable, inject } from 'inversify';
 import { ContextMenuRenderer, NodeProps, TreeProps, TreeNode, SELECTED_CLASS, FOCUS_CLASS } from '@theia/core/lib/browser';
 import { FileTreeWidget, FileStatNode } from '../file-tree';
 import { FileDialogModel } from './file-dialog-model';
+import { WidgetManager } from '@theia/core/lib/browser';
 
 export const FILE_DIALOG_CLASS = 'theia-FileDialog';
 export const NOT_SELECTABLE_CLASS = 'theia-mod-not-selectable';
@@ -30,9 +31,10 @@ export class FileDialogWidget extends FileTreeWidget {
     constructor(
         @inject(TreeProps) readonly props: TreeProps,
         @inject(FileDialogModel) readonly model: FileDialogModel,
-        @inject(ContextMenuRenderer) contextMenuRenderer: ContextMenuRenderer
+        @inject(ContextMenuRenderer) contextMenuRenderer: ContextMenuRenderer,
+        @inject(WidgetManager) protected readonly widgetManager: WidgetManager
     ) {
-        super(props, model, contextMenuRenderer);
+        super(props, model, contextMenuRenderer, widgetManager);
         this.addClass(FILE_DIALOG_CLASS);
     }
 

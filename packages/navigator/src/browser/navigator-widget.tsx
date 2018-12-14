@@ -31,6 +31,7 @@ import { WorkspaceNode } from './navigator-tree';
 import { FileNavigatorModel } from './navigator-model';
 import { FileSystem } from '@theia/filesystem/lib/common/filesystem';
 import { isOSX, environment } from '@theia/core';
+import { WidgetManager } from '@theia/core/lib/browser';
 import * as React from 'react';
 
 export const FILE_NAVIGATOR_ID = 'files';
@@ -50,9 +51,10 @@ export class FileNavigatorWidget extends FileTreeWidget {
         @inject(SelectionService) protected readonly selectionService: SelectionService,
         @inject(WorkspaceService) protected readonly workspaceService: WorkspaceService,
         @inject(ApplicationShell) protected readonly shell: ApplicationShell,
-        @inject(FileSystem) protected readonly fileSystem: FileSystem
+        @inject(FileSystem) protected readonly fileSystem: FileSystem,
+        @inject(WidgetManager) protected readonly widgetManager: WidgetManager
     ) {
-        super(props, model, contextMenuRenderer);
+        super(props, model, contextMenuRenderer, widgetManager);
         this.id = FILE_NAVIGATOR_ID;
         this.title.label = LABEL;
         this.title.caption = LABEL;

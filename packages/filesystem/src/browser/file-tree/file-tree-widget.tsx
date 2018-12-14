@@ -20,6 +20,7 @@ import { DirNode, FileStatNode } from './file-tree';
 import { FileTreeModel } from './file-tree-model';
 import { DisposableCollection, Disposable } from '@theia/core/lib/common';
 import { UriSelection } from '@theia/core/lib/common/selection';
+import { WidgetManager } from '@theia/core/lib/browser';
 import * as React from 'react';
 
 export const FILE_TREE_CLASS = 'theia-FileTree';
@@ -35,7 +36,8 @@ export class FileTreeWidget extends TreeWidget {
     constructor(
         @inject(TreeProps) readonly props: TreeProps,
         @inject(FileTreeModel) readonly model: FileTreeModel,
-        @inject(ContextMenuRenderer) contextMenuRenderer: ContextMenuRenderer
+        @inject(ContextMenuRenderer) contextMenuRenderer: ContextMenuRenderer,
+        @inject(WidgetManager) protected readonly widgetManager: WidgetManager
     ) {
         super(props, model, contextMenuRenderer);
         this.addClass(FILE_TREE_CLASS);
@@ -143,12 +145,17 @@ export class FileTreeWidget extends TreeWidget {
     }
 
     protected setTreeNodeAsData(data: DataTransfer, node: TreeNode): void {
-        data.setData('tree-node', node.id);
+        data.setData('tree-data', JSON.stringify({ widgetId: this.id, nodeId: node.id }));
     }
 
     protected getTreeNodeFromData(data: DataTransfer): TreeNode | undefined {
-        const id = data.getData('tree-node');
-        return this.model.getNode(id);
+        const { widgetId, nodeId } = JSON.parse(data.getData('tree-data'));
+
+        const widget = this.widgetManager.tryGetWidget(widgetId);
+        if (widget) {
+            const treeWidget = widget as TreeWidget;
+            return treeWidget.model.getNode(nodeId);
+        }
     }
 
 }
