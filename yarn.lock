@@ -6828,6 +6828,16 @@ npm-run-path@^2.0.0:
     gauge "~2.7.3"
     set-blocking "~2.0.0"
 
+nsfw@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/nsfw/-/nsfw-1.2.1.tgz#5a315a5d8fdfeaa54537a92943adcda4bfd86ea7"
+  integrity sha512-NIBtFZYP33HZgIUtzDTwVVXDPiNkgGMP/aF/2/cwS+W1bOsD2c1RyhKzvj1KVi6N1NzETORCm0hlVSvi5oSARA==
+  dependencies:
+    fs-extra "^7.0.0"
+    lodash.isinteger "^4.0.4"
+    lodash.isundefined "^3.0.1"
+    nan "^2.0.0"
+
 nugget@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/nugget/-/nugget-2.0.1.tgz#201095a487e1ad36081b3432fa3cada4f8d071b0"
@@ -10006,16 +10016,6 @@ vscode-languageserver@^4.0.0, vscode-languageserver@^4.4.0:
 vscode-nls@^3.2.2, vscode-nls@^3.2.4:
   version "3.2.4"
   resolved "https://registry.yarnpkg.com/vscode-nls/-/vscode-nls-3.2.4.tgz#2166b4183c8aea884d20727f5449e62be69fd398"
-
-vscode-nsfw@^1.1.2:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/vscode-nsfw/-/vscode-nsfw-1.1.2.tgz#9cb9073b5854386801afe41f7152f721b4ea9e80"
-  integrity sha512-J0So+JNK/5kQboTO1hKNk4ie/wwUegrJilYSY5sVxU9JJlo3aQdP0zi2NtU8CEK3kkN6qRp0MbXCzbT0LKGorg==
-  dependencies:
-    fs-extra "^7.0.0"
-    lodash.isinteger "^4.0.4"
-    lodash.isundefined "^3.0.1"
-    nan "^2.10.0"
 
 vscode-ripgrep@^1.2.4:
   version "1.2.4"
