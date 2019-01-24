@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.3.20
+- [plugin] added `tasks.onDidEndTask` Plug-in API
+- [cpp] fixed `CPP_CLANGD_COMMAND` and `CPP_CLANGD_ARGS` environment variables
+
+
 ## v0.3.19
 - [core] added `hostname` alias
 - [core] added new `editor.formatOnSave` preference, to format documents on manual save
