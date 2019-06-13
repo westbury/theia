@@ -22,12 +22,19 @@ import { TERMINAL_WIDGET_FACTORY_ID, TerminalWidgetFactoryOptions } from '@theia
 import { TerminalWidget } from '@theia/terminal/lib/browser/base/terminal-widget';
 import { WidgetManager } from '@theia/core/lib/browser/widget-manager';
 import { MessageService } from '@theia/core/lib/common/message-service';
-import { TaskServer, TaskExitedEvent, TaskInfo, TaskConfiguration } from '../common/task-protocol';
+import { TaskServer, TaskInfo, TaskConfiguration } from '../common/task-protocol';
 import { WorkspaceService } from '@theia/workspace/lib/browser/workspace-service';
 import { VariableResolverService } from '@theia/variable-resolver/lib/browser';
 import { TaskWatcher } from '../common/task-watcher';
 import { TaskConfigurationClient, TaskConfigurations } from './task-configurations';
+import { IProcessExitEvent } from '@theia/process/lib/node/process';
 import URI from '@theia/core/lib/common/uri';
+
+import { WebSocketConnectionProvider } from '@theia/core/lib/browser';
+import { MessageConnection } from 'vscode-jsonrpc';
+import { Deferred } from '@theia/core/lib/common/promise-util';
+import { tasksPath } from '../common/task-protocol';
+import { DisposableCollection } from '@theia/core';
 
 @injectable()
 export class TaskService implements TaskConfigurationClient {
@@ -73,6 +80,11 @@ export class TaskService implements TaskConfigurationClient {
     @inject(TaskProviderRegistry)
     protected readonly taskProviderRegistry: TaskProviderRegistry;
 
+    @inject(WebSocketConnectionProvider)
+    protected readonly webSocketConnectionProvider: WebSocketConnectionProvider;
+
+    protected readonly toDispose = new DisposableCollection();
+
     @postConstruct()
     protected init(): void {
         this.workspaceService.onWorkspaceChanged(async roots => {
@@ -90,29 +102,50 @@ export class TaskService implements TaskConfigurationClient {
         // notify user that task has started
         this.taskWatcher.onTaskCreated((event: TaskInfo) => {
             if (this.isEventForThisClient(event.ctx)) {
-                this.messageService.info(`Task #${event.taskId} created - ${event.config.label}`);
+                const task = event.config;
+                // const provider = this.taskProviderRegistry.getProvider(task.source);
+                // if (!provider || !provider.attach) {
+                //     const taskIdentifier =
+                //         task
+                //             ? ContributedTaskConfiguration.is(task)
+                //                 ? `${task._source}: ${task.label}`
+                //                 : `${task.type}: ${task.label}`
+                //             : `${event.taskId}`;
+                //     this.messageService.info(`Task ${taskIdentifier} has been started`);
+                // }
             }
         });
 
         // notify user that task has finished
-        this.taskWatcher.onTaskExit((event: TaskExitedEvent) => {
-            if (!this.isEventForThisClient(event.ctx)) {
-                return;
-            }
+        // this.taskWatcher.onTaskExit((event: TaskExitedEvent) => {
+        //     if (!this.isEventForThisClient(event.ctx)) {
+        //         return;
+        //     }
 
-            if (event.code !== undefined) {
-                const message = `Task ${event.taskId} has exited with code ${event.code}.`;
-                if (event.code === 0) {
-                    this.messageService.info(message);
-                } else {
-                    this.messageService.error(message);
-                }
-            } else if (event.signal !== undefined) {
-                this.messageService.info(`Task ${event.taskId} was terminated by signal ${event.signal}.`);
-            } else {
-                console.error('Invalid TaskExitedEvent received, neither code nor signal is set.');
-            }
-        });
+        //     const taskConfiguration = event.config;
+        //     const provider = this.taskProviderRegistry.getProvider(taskConfiguration.source);
+        //     if (!provider || !provider.attach) {
+        //         const taskIdentifier =
+        //             taskConfiguration
+        //                 ? ContributedTaskConfiguration.is(taskConfiguration)
+        //                     ? `${taskConfiguration._source}: ${taskConfiguration.label}`
+        //                     : `${taskConfiguration.type}: ${taskConfiguration.label}`
+        //                 : `${event.taskId}`;
+
+        //         if (event.code !== undefined) {
+        //             const message = `Task ${taskIdentifier} has exited with code ${event.code}.`;
+        //             if (event.code === 0) {
+        //                 this.messageService.info(message);
+        //             } else {
+        //                 console.error('Invalid TaskExitedEvent received, neither code nor signal is set.');
+        //             }
+        //         } else if (event.signal !== undefined) {
+        //             this.messageService.info(`Task ${taskIdentifier} was terminated by signal ${event.signal}.`);
+        //         } else {
+        //             console.error('Invalid TaskExitedEvent received, neither code nor signal is set.');
+        //         }
+        //     }
+        // });
     }
 
     /** Returns an array of the task configurations configured in tasks.json and provided by the extensions. */
@@ -199,8 +232,57 @@ export class TaskService implements TaskConfigurationClient {
         this.logger.debug(`Task created. Task id: ${taskInfo.taskId}`);
 
         // open terminal widget if the task is based on a terminal process (type: shell)
+        // or attach to process output processor if a raw process (type: process)
         if (taskInfo.terminalId !== undefined) {
-            this.attach(taskInfo.terminalId, taskInfo.taskId);
+            if (taskInfo.config.type === 'shell') {
+                this.attach(taskInfo.terminalId, taskInfo.taskId);
+            } else {
+                this.attachProcess(taskInfo);
+            }
+        }
+    }
+
+    protected waitForConnection: Deferred<MessageConnection> | undefined;
+
+    protected async attachProcess(taskInfo: TaskInfo): Promise<void> {
+        const { processId, config } = taskInfo;
+        const { source } = config;
+
+        const provider = this.taskProviderRegistry.getProvider(source);
+        if (provider && provider.attach) {
+            const waitForConnection = this.waitForConnection = new Deferred<MessageConnection>();
+
+            const doKill = async () => {
+                const connection = await waitForConnection.promise;
+                connection.sendRequest('kill');
+            };
+
+            const lineProcessor = await provider.attach(taskInfo, doKill);
+
+            this.webSocketConnectionProvider.listen({
+                path: `${tasksPath}/${processId}`,
+                onConnection: connection => {
+                    connection.onNotification('onLine', (data: string) => lineProcessor.processLine(data));
+                    connection.onNotification('onStart', () => lineProcessor.notifyStart(taskInfo.taskId, taskInfo.config));
+                    connection.onNotification('onExit', (event: IProcessExitEvent) => lineProcessor.notifyExit(
+                        {
+                            taskId: taskInfo.taskId,
+                            config: taskInfo.config,
+                            ctx: taskInfo.ctx,
+                            ...event
+                        }
+                    ));
+                    connection.onDispose(() => lineProcessor.close());
+
+                    this.toDispose.push(connection);
+                    connection.listen();
+                    if (waitForConnection) {
+                        waitForConnection.resolve(connection);
+                    }
+                }
+            }, { reconnecting: false });
+        } else {
+            this.logger.error(`TaskProvider implementation missing for ${source}.`);
         }
     }
 

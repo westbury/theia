@@ -18,6 +18,7 @@ import { injectable } from 'inversify';
 import { ILogger, Emitter, Event, MaybePromise } from '@theia/core/lib/common/';
 import { TaskManager } from './task-manager';
 import { TaskInfo, TaskExitedEvent, TaskConfiguration } from '../common/task-protocol';
+import { MessageConnection } from 'vscode-jsonrpc';
 
 export interface TaskOptions {
     label: string,
@@ -42,6 +43,9 @@ export abstract class Task {
 
     /** Terminates the task. */
     abstract kill(): Promise<void>;
+
+    /** Initializes the client connection for the task. */
+    abstract initClientConnection(connection: MessageConnection): void;
 
     get onExit(): Event<TaskExitedEvent> {
         return this.exitEmitter.event;

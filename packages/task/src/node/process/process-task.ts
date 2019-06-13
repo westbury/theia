@@ -15,8 +15,10 @@
  ********************************************************************************/
 
 import { injectable, inject, named } from 'inversify';
+import { MessageConnection } from 'vscode-jsonrpc';
+import * as readline from 'readline';
 import { ILogger } from '@theia/core/lib/common/';
-import { Process } from '@theia/process/lib/node';
+import { Process, RawProcess } from '@theia/process/lib/node';
 import { Task, TaskOptions } from '../task';
 import { TaskManager } from '../task-manager';
 import { ProcessType, ProcessTaskInfo } from '../../common/process/task-protocol';
@@ -47,6 +49,7 @@ export class ProcessTask extends Task {
                 toDispose.dispose();
                 this.fireTaskExited({
                     taskId: this.taskId,
+                    config: this.options.config,
                     ctx: this.options.context,
                     code: event.code,
                     signal: event.signal
@@ -70,12 +73,32 @@ export class ProcessTask extends Task {
         });
     }
 
+    initClientConnection(connection: MessageConnection): void {
+        const process = this.options.process;
+        if (process instanceof RawProcess) {
+            const outputReadline = readline.createInterface({ input: process.output, crlfDelay: Infinity });
+            outputReadline.on('line', (data: string) => connection.sendNotification('onLine', data));
+
+            connection.onRequest('kill', (data: string) => process.kill());
+
+            connection.sendNotification('onStart');
+            process.onExit(event => connection.sendNotification('onExit', event));
+
+            connection.listen();
+        } else {
+            // We don't connect to terminal process here.  No tasks use terminal process
+            // and one would need a custom runner and a custom Task implementation if a task
+            // did use a terminal process.
+        }
+    }
+
     getRuntimeInfo(): ProcessTaskInfo {
         return {
             taskId: this.id,
             ctx: this.context,
             config: this.options.config,
-            terminalId: (this.processType === 'shell') ? this.process.id : undefined
+            terminalId: (this.processType === 'shell') ? this.process.id : undefined,
+            processId: this.process.id
         };
     }
     get process() {

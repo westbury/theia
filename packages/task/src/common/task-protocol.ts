@@ -17,6 +17,7 @@
 import { JsonRpcServer } from '@theia/core/lib/common/messaging/proxy-factory';
 
 export const taskPath = '/services/task';
+export const tasksPath = '/services/tasks';
 
 export const TaskServer = Symbol('TaskServer');
 export const TaskClient = Symbol('TaskClient');
@@ -69,6 +70,7 @@ export interface TaskServer extends JsonRpcServer<TaskClient> {
 /** Event sent when a task has concluded its execution */
 export interface TaskExitedEvent {
     readonly taskId: number;
+    readonly config: TaskConfiguration;
     readonly ctx?: string;
 
     // Exactly one of code and signal will be set.
