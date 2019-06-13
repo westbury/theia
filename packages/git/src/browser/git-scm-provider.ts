@@ -416,10 +416,13 @@ export class GitAmendSupport implements ScmAmendSupport {
         await this.git.exec(this.repository, ['reset', commit, '--soft']);
     }
 
-    public async getLastCommit(): Promise<ScmCommit | undefined> {
-        const commits = await this.git.log(this.repository, { maxCount: 1 });
+    public async getLastCommit(): Promise<{ lastCommit: ScmCommit, amendable: boolean } | undefined> {
+        const commits = await this.git.log(this.repository, { maxCount: 2 });
         if (commits.length > 0) {
-            return this.createScmCommit(commits[0]);
+            return {
+                lastCommit: this.createScmCommit(commits[0]),
+                amendable: commits.length > 1
+            };
         }
     }
 

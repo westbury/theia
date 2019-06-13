@@ -51,7 +51,7 @@ interface ScmAmendComponentState {
     };
 
     amendingCommits: { commit: ScmCommit, avatar: string }[];
-    lastCommit: { commit: ScmCommit, avatar: string } | undefined;
+    lastCommit: { commit: ScmCommit, avatar: string, amendable: boolean } | undefined;
 }
 
 const TRANSITION_TIME_MS = 300;
@@ -280,11 +280,11 @@ export class ScmAmendComponent extends React.Component<ScmAmendComponentProps, S
         );
     }
 
-    protected async getLastCommit(): Promise<{ commit: ScmCommit, avatar: string } | undefined> {
+    protected async getLastCommit(): Promise<{ commit: ScmCommit, avatar: string, amendable: boolean } | undefined> {
         const commit = await this.props.scmAmendSupport.getLastCommit();
         if (commit) {
-            const avatar = await this.props.avatarService.getAvatar(commit.authorEmail);
-            return { commit, avatar };
+            const avatar = await this.props.avatarService.getAvatar(commit.lastCommit.authorEmail);
+            return { commit: commit.lastCommit, amendable: commit.amendable, avatar };
         }
         return undefined;
     }
@@ -346,7 +346,7 @@ export class ScmAmendComponent extends React.Component<ScmAmendComponentProps, S
             {
                 canAmend
                     ? <div className={ScmAmendComponent.Styles.FLEX_CENTER}>
-                        <button className='theia-button' title='Amend last commit' onClick={this.amend}>
+                        <button className='theia-button' title='Amend last commit' disabled={!this.state.lastCommit.amendable} onClick={this.amend}>
                             Amend
                         </button>
                     </div>
