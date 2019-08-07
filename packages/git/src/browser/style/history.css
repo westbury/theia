@@ -205,3 +205,10 @@
 .git-history-tab-icon::before {
     content: "\f1da"
 }
+
+.theia-git > .clear {
+    background: var(--theia-icon-close) no-repeat center center;
+}
+.theia-git > .clear:hover {
+    transform: scale(1.2);
+}

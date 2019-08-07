@@ -298,12 +298,35 @@ export class GitHistoryWidget extends GitNavigableListWidget<GitHistoryListNode>
                     this.renderHeaderRow({ name: 'repository', value: this.getRepositoryLabel(this.options.uri) })
                 }
                 {
-                    this.renderHeaderRow({ name: 'file', value: fileName, title: path })
+                    this.renderClearableHeaderRow({ name: 'file', value: fileName, title: path })
                 }
                 <div className='theia-header'>
                     Commits
                 </div>
             </div>;
+        }
+    }
+
+    protected renderClearableHeaderRow({ name, value, classNames, title }: { name: string, value: React.ReactNode, classNames?: string[], title?: string }): React.ReactNode {
+        if (!value) {
+            return;
+        }
+        const className = ['header-row', ...(classNames || [])].join(' ');
+        return <div key={name} className={className} title={title}>
+            <div className='theia-header'>{name}</div>
+            <div className='header-value'>{value}</div>
+            <div className='theia-git clear' onClick={() => this.resetToRepositoryRoot()}></div>
+        </div>;
+    } // fa fa-times-circle
+
+    protected resetToRepositoryRoot() {
+        if (this.options.uri) {
+            const parsedUri = new URI(this.options.uri);
+            const repo = this.repositoryProvider.findRepository(parsedUri);
+            if (repo) {
+                const options = { ...this.options, uri: repo.localUri };
+                this.setContent(options);
+            }
         }
     }
 
