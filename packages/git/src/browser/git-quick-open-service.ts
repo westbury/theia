@@ -25,7 +25,7 @@ import { FileSystem, FileStat } from '@theia/filesystem/lib/common';
 import { GitErrorHandler } from './git-error-handler';
 import { ProgressService } from '@theia/core/lib/common/progress-service';
 import URI from '@theia/core/lib/common/uri';
-import { LabelProvider } from '@theia/core/lib/browser';
+import { UriLabelProvider } from '@theia/core/lib/browser';
 
 export enum GitAction {
     PULL,
@@ -42,7 +42,7 @@ export class GitQuickOpenService {
 
     @inject(GitErrorHandler) protected readonly gitErrorHandler: GitErrorHandler;
     @inject(ProgressService) protected readonly progressService: ProgressService;
-    @inject(LabelProvider) protected readonly labelProvider: LabelProvider;
+    @inject(UriLabelProvider) protected readonly labelProvider: UriLabelProvider;
 
     constructor(
         @inject(Git) protected readonly git: Git,
@@ -54,7 +54,7 @@ export class GitQuickOpenService {
     ) { }
 
     async clone(url?: string, folder?: string, branch?: string): Promise<string | undefined> {
-        return this.withProgress(async () =>  {
+        return this.withProgress(async () => {
             if (!folder) {
                 const roots = await this.workspaceService.roots;
                 folder = roots[0].uri;
@@ -115,7 +115,7 @@ export class GitQuickOpenService {
         if (!repository) {
             return;
         }
-        return this.withProgress(async () =>  {
+        return this.withProgress(async () => {
             const remotes = await this.getRemotes();
             const execute = async (item: QuickOpenItem) => {
                 try {
@@ -140,7 +140,7 @@ export class GitQuickOpenService {
         if (!repository) {
             return;
         }
-        return this.withProgress(async () =>  {
+        return this.withProgress(async () => {
             try {
                 if (action === GitAction.PULL) {
                     await this.git.pull(repository, { remote: defaultRemote });
@@ -160,7 +160,7 @@ export class GitQuickOpenService {
         if (!repository) {
             return;
         }
-        return this.withProgress(async () =>  {
+        return this.withProgress(async () => {
             const [remotes, currentBranch] = await Promise.all([this.getRemotes(), this.getCurrentBranch()]);
             const execute = async (item: QuickOpenItem) => {
                 try {
@@ -184,7 +184,7 @@ export class GitQuickOpenService {
         if (!repository) {
             return;
         }
-        return this.withProgress(async () =>  {
+        return this.withProgress(async () => {
             const remotes = await this.getRemotes();
             const defaultRemote = remotes[0].name; // I wish I could use assignment destructuring here. (GH-413)
             const executeRemote = async (remoteItem: GitQuickOpenItem<Remote>) => {
@@ -227,7 +227,7 @@ export class GitQuickOpenService {
         if (!repository) {
             return;
         }
-        return this.withProgress(async () =>  {
+        return this.withProgress(async () => {
             const [branches, currentBranch] = await Promise.all([this.getBranches(), this.getCurrentBranch()]);
             const execute = async (item: GitQuickOpenItem<Branch>) => {
                 try {
@@ -248,7 +248,7 @@ export class GitQuickOpenService {
         if (!repository) {
             return;
         }
-        return this.withProgress(async () =>  {
+        return this.withProgress(async () => {
             const [branches, currentBranch] = await Promise.all([this.getBranches(), this.getCurrentBranch()]);
             if (currentBranch) {
                 // We do not show the current branch.
@@ -312,7 +312,7 @@ export class GitQuickOpenService {
         if (!repository) {
             return;
         }
-        return this.withProgress(async () =>  {
+        return this.withProgress(async () => {
             const [branches, tags, currentBranch] = await Promise.all([this.getBranches(repository), this.getTags(repository), this.getCurrentBranch(repository)]);
             const execute = async (item: GitQuickOpenItem<Branch | Tag>) => {
                 execFunc(item.ref.name, currentBranch ? currentBranch.name : '');
@@ -331,7 +331,7 @@ export class GitQuickOpenService {
         if (!repository) {
             throw new Error('No repositories were selected.');
         }
-        return this.withProgress(async () =>  {
+        return this.withProgress(async () => {
             const lastMessage = (await this.git.exec(repository, ['log', '--format=%B', '-n', '1'])).stdout.trim();
             if (lastMessage.length === 0) {
                 throw new Error(`Repository ${repository.localUri} is not yet initialized.`);
@@ -398,7 +398,7 @@ export class GitQuickOpenService {
         if (!repository) {
             return;
         }
-        return this.withProgress(async () =>  {
+        return this.withProgress(async () => {
             const list = await this.git.stash(repository, { action: 'list' });
             if (list) {
                 const quickOpenItems = list.map(stash => new GitQuickOpenItem<StashEntry>(stash, this.wrapWithProgress(async () => {
@@ -450,7 +450,7 @@ export class GitQuickOpenService {
         if (!repository) {
             return;
         }
-        return this.withProgress(async () =>  {
+        return this.withProgress(async () => {
             try {
                 await this.git.stash(repository, {
                     action: 'apply'
@@ -466,7 +466,7 @@ export class GitQuickOpenService {
         if (!repository) {
             return;
         }
-        return this.withProgress(async () =>  {
+        return this.withProgress(async () => {
             try {
                 await this.git.stash(repository, {
                     action: 'pop'
@@ -490,7 +490,7 @@ export class GitQuickOpenService {
     }
 
     private async doInitRepository(uri: string): Promise<void> {
-        this.withProgress(async () => this.git.exec({localUri: uri}, ['init']));
+        this.withProgress(async () => this.git.exec({ localUri: uri }, ['init']));
     }
 
     private toRepositoryPathQuickOpenItem(root: FileStat): GitQuickOpenItem<URI> {
@@ -534,7 +534,7 @@ export class GitQuickOpenService {
         if (!repository) {
             return [];
         }
-        return this.withProgress(async () =>  {
+        return this.withProgress(async () => {
             try {
                 return await this.git.remote(repository, { verbose: true });
             } catch (error) {
@@ -548,7 +548,7 @@ export class GitQuickOpenService {
         if (!repository) {
             return [];
         }
-        return this.withProgress(async () =>  {
+        return this.withProgress(async () => {
             const result = await this.git.exec(repository, ['tag', '--sort=-creatordate']);
             return result.stdout !== '' ? result.stdout.trim().split('\n').map(tag => ({ name: tag })) : [];
         });
@@ -558,7 +558,7 @@ export class GitQuickOpenService {
         if (!repository) {
             return [];
         }
-        return this.withProgress(async () =>  {
+        return this.withProgress(async () => {
             try {
                 const [local, remote] = await Promise.all([
                     this.git.branch(repository, { type: 'local' }),
@@ -576,7 +576,7 @@ export class GitQuickOpenService {
         if (!repository) {
             return undefined;
         }
-        return this.withProgress(async () =>  {
+        return this.withProgress(async () => {
             try {
                 return await this.git.branch(repository, { type: 'current' });
             } catch (error) {

@@ -18,7 +18,7 @@ import { ContainerModule } from 'inversify';
 import { ResourceResolver, CommandContribution, MenuContribution } from '@theia/core/lib/common';
 import { KeybindingContribution, KeybindingContext } from '@theia/core/lib/browser';
 import { LanguageClientContribution } from '@theia/languages/lib/browser';
-import { LabelProviderContribution } from '@theia/core/lib/browser/label-provider';
+import { UriLabelProviderContribution } from '@theia/core/lib/browser/uri-label-provider';
 
 import { JavaClientContribution } from './java-client-contribution';
 import { JavaCommandContribution } from './java-commands';
@@ -43,5 +43,5 @@ export default new ContainerModule(bind => {
     bind(JavaResourceResolver).toSelf().inSingletonScope();
     bind(ResourceResolver).toService(JavaResourceResolver);
 
-    bind(LabelProviderContribution).to(JavaLabelProviderContribution).inSingletonScope();
+    bind(UriLabelProviderContribution).to(JavaLabelProviderContribution).inSingletonScope();
 });

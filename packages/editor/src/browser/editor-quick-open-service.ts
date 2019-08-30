@@ -21,7 +21,7 @@ import {
     QuickOpenHandler, QuickOpenOptions
 } from '@theia/core/lib/browser';
 import URI from '@theia/core/lib/common/uri';
-import { LabelProvider } from '@theia/core/lib/browser/label-provider';
+import { UriLabelProvider } from '@theia/core/lib/browser/uri-label-provider';
 import { CancellationTokenSource } from '@theia/core/lib/common';
 import { EditorManager } from './editor-manager';
 import { EditorWidget } from './editor-widget';
@@ -35,8 +35,8 @@ export class EditorQuickOpenService implements QuickOpenModel, QuickOpenHandler 
     @inject(PrefixQuickOpenService)
     protected readonly prefixQuickOpenService: PrefixQuickOpenService;
 
-    @inject(LabelProvider)
-    protected readonly labelProvider: LabelProvider;
+    @inject(UriLabelProvider)
+    protected readonly labelProvider: UriLabelProvider;
 
     @inject(EditorManager)
     protected readonly editorManager: EditorManager;

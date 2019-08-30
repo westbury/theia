@@ -20,7 +20,7 @@ import { ContainerModule } from 'inversify';
 import { CommandContribution, MenuContribution, ResourceResolver } from '@theia/core/lib/common';
 import {
     WebSocketConnectionProvider,
-    LabelProviderContribution,
+    UriLabelProviderContribution,
     FrontendApplicationContribution,
 } from '@theia/core/lib/browser';
 import { TabBarToolbarContribution } from '@theia/core/lib/browser/shell/tab-bar-toolbar';
@@ -68,7 +68,7 @@ export default new ContainerModule(bind => {
     bind(GitRepositoryProvider).toSelf().inSingletonScope();
     bind(GitQuickOpenService).toSelf().inSingletonScope();
 
-    bind(LabelProviderContribution).to(GitUriLabelProviderContribution).inSingletonScope();
+    bind(UriLabelProviderContribution).to(GitUriLabelProviderContribution).inSingletonScope();
     bind(NavigatorTreeDecorator).to(GitDecorator).inSingletonScope();
 
     bind(GitCommitMessageValidator).toSelf().inSingletonScope();

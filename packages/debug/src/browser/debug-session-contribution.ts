@@ -16,7 +16,7 @@
 
 import { injectable, inject, named, postConstruct } from 'inversify';
 import { MessageClient } from '@theia/core/lib/common';
-import { LabelProvider } from '@theia/core/lib/browser';
+import { UriLabelProvider } from '@theia/core/lib/browser';
 import { EditorManager } from '@theia/editor/lib/browser';
 import { TerminalService } from '@theia/terminal/lib/browser/base/terminal-service';
 import { WebSocketConnectionProvider } from '@theia/core/lib/browser/messaging/ws-connection-provider';
@@ -104,8 +104,8 @@ export class DefaultDebugSessionFactory implements DebugSessionFactory {
     protected readonly editorManager: EditorManager;
     @inject(BreakpointManager)
     protected readonly breakpoints: BreakpointManager;
-    @inject(LabelProvider)
-    protected readonly labelProvider: LabelProvider;
+    @inject(UriLabelProvider)
+    protected readonly labelProvider: UriLabelProvider;
     @inject(MessageClient)
     protected readonly messages: MessageClient;
     @inject(OutputChannelManager)

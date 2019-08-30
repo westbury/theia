@@ -16,7 +16,7 @@
 import { inject, injectable, postConstruct } from 'inversify';
 import {
     AbstractViewContribution,
-    FrontendApplicationContribution, LabelProvider,
+    FrontendApplicationContribution, UriLabelProvider,
     QuickOpenService,
     StatusBar,
     StatusBarAlignment,
@@ -58,7 +58,7 @@ export class ScmContribution extends AbstractViewContribution<ScmWidget> impleme
     @inject(ScmService) protected readonly scmService: ScmService;
     @inject(QuickOpenService) protected readonly quickOpenService: QuickOpenService;
     @inject(ScmQuickOpenService) protected readonly scmQuickOpenService: ScmQuickOpenService;
-    @inject(LabelProvider) protected readonly labelProvider: LabelProvider;
+    @inject(UriLabelProvider) protected readonly labelProvider: UriLabelProvider;
     @inject(CommandService) protected readonly commands: CommandService;
     @inject(ContextKeyService) protected readonly contextKeys: ContextKeyService;
 

@@ -20,7 +20,7 @@ let disableJSDOM = enableJSDOM();
 import { Container } from 'inversify';
 import { Emitter, ILogger, Logger } from '@theia/core';
 import {
-    CompositeTreeNode, DefaultOpenerService, ExpandableTreeNode, LabelProvider, OpenerService,
+    CompositeTreeNode, DefaultOpenerService, ExpandableTreeNode, UriLabelProvider, OpenerService,
     Tree, TreeNode, TreeSelectionService, TreeExpansionService, TreeExpansionServiceImpl,
     TreeNavigationService, TreeSearch, CorePreferences
 } from '@theia/core/lib/browser';
@@ -120,7 +120,7 @@ describe('FileNavigatorModel', () => {
     let mockFileNavigatorTree: FileNavigatorTree;
     let mockWorkspaceService: WorkspaceService;
     let mockFilesystem: FileSystem;
-    let mockLabelProvider: LabelProvider;
+    let mockLabelProvider: UriLabelProvider;
     let mockFileSystemWatcher: FileSystemWatcher;
     let mockILogger: ILogger;
     let mockTreeSelectionService: TreeSelectionService;
@@ -151,7 +151,7 @@ describe('FileNavigatorModel', () => {
         mockFileNavigatorTree = sinon.createStubInstance(FileNavigatorTree);
         mockWorkspaceService = sinon.createStubInstance(WorkspaceService);
         mockFilesystem = sinon.createStubInstance(FileSystemNode);
-        mockLabelProvider = sinon.createStubInstance(LabelProvider);
+        mockLabelProvider = sinon.createStubInstance(UriLabelProvider);
         mockFileSystemWatcher = sinon.createStubInstance(FileSystemWatcher);
         mockILogger = sinon.createStubInstance(Logger);
         mockTreeSelectionService = sinon.createStubInstance(TreeSelectionServiceImpl);
@@ -167,7 +167,7 @@ describe('FileNavigatorModel', () => {
         testContainer.bind(FileNavigatorTree).toConstantValue(mockFileNavigatorTree);
         testContainer.bind(WorkspaceService).toConstantValue(mockWorkspaceService);
         testContainer.bind(FileSystem).toConstantValue(mockFilesystem);
-        testContainer.bind(LabelProvider).toConstantValue(mockLabelProvider);
+        testContainer.bind(UriLabelProvider).toConstantValue(mockLabelProvider);
         testContainer.bind(FileSystemWatcher).toConstantValue(mockFileSystemWatcher);
         testContainer.bind(ILogger).toConstantValue(mockILogger);
         testContainer.bind(Tree).toConstantValue(mockFileNavigatorTree);

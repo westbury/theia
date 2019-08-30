@@ -25,7 +25,7 @@ import {
 } from '../../../common/plugin-api-rpc';
 import { DebugSessionManager } from '@theia/debug/lib/browser/debug-session-manager';
 import { Breakpoint, WorkspaceFolder } from '../../../common/plugin-api-rpc-model';
-import { LabelProvider } from '@theia/core/lib/browser';
+import { UriLabelProvider } from '@theia/core/lib/browser';
 import { EditorManager } from '@theia/editor/lib/browser';
 import { BreakpointManager } from '@theia/debug/lib/browser/breakpoint/breakpoint-manager';
 import { DebugBreakpoint } from '@theia/debug/lib/browser/model/debug-breakpoint';
@@ -55,7 +55,7 @@ export class DebugMainImpl implements DebugMain {
     private readonly debugExt: DebugExt;
 
     private readonly sessionManager: DebugSessionManager;
-    private readonly labelProvider: LabelProvider;
+    private readonly labelProvider: UriLabelProvider;
     private readonly editorManager: EditorManager;
     private readonly breakpointsManager: BreakpointManager;
     private readonly debugConsoleSession: DebugConsoleSession;
@@ -75,7 +75,7 @@ export class DebugMainImpl implements DebugMain {
     constructor(rpc: RPCProtocol, readonly connectionMain: ConnectionMainImpl, container: interfaces.Container) {
         this.debugExt = rpc.getProxy(MAIN_RPC_CONTEXT.DEBUG_EXT);
         this.sessionManager = container.get(DebugSessionManager);
-        this.labelProvider = container.get(LabelProvider);
+        this.labelProvider = container.get(UriLabelProvider);
         this.editorManager = container.get(EditorManager);
         this.breakpointsManager = container.get(BreakpointManager);
         this.debugConsoleSession = container.get(DebugConsoleSession);

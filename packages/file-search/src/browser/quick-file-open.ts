@@ -25,7 +25,7 @@ import { WorkspaceService } from '@theia/workspace/lib/browser/workspace-service
 import URI from '@theia/core/lib/common/uri';
 import { FileSearchService } from '../common/file-search-service';
 import { CancellationTokenSource } from '@theia/core/lib/common';
-import { LabelProvider } from '@theia/core/lib/browser/label-provider';
+import { UriLabelProvider } from '@theia/core/lib/browser/uri-label-provider';
 import { Command } from '@theia/core/lib/common';
 import { NavigationLocationService } from '@theia/editor/lib/browser/navigation/navigation-location-service';
 import * as fuzzy from 'fuzzy';
@@ -52,8 +52,8 @@ export class QuickFileOpenService implements QuickOpenModel, QuickOpenHandler {
     protected readonly quickOpenService: PrefixQuickOpenService;
     @inject(FileSearchService)
     protected readonly fileSearchService: FileSearchService;
-    @inject(LabelProvider)
-    protected readonly labelProvider: LabelProvider;
+    @inject(UriLabelProvider)
+    protected readonly labelProvider: UriLabelProvider;
     @inject(NavigationLocationService)
     protected readonly navigationLocationService: NavigationLocationService;
     @inject(MessageService)

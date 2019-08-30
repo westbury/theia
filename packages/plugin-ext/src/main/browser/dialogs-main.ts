@@ -21,14 +21,14 @@ import URI from '@theia/core/lib/common/uri';
 import { DirNode, OpenFileDialogProps, SaveFileDialogProps, OpenFileDialogFactory, SaveFileDialogFactory } from '@theia/filesystem/lib/browser';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
 import { FileSystem, FileStat } from '@theia/filesystem/lib/common';
-import { LabelProvider } from '@theia/core/lib/browser';
+import { UriLabelProvider } from '@theia/core/lib/browser';
 import { UriSelection } from '@theia/core/lib/common/selection';
 
 export class DialogsMainImpl implements DialogsMain {
 
     private workspaceService: WorkspaceService;
     private fileSystem: FileSystem;
-    private labelProvider: LabelProvider;
+    private labelProvider: UriLabelProvider;
 
     private openFileDialogFactory: OpenFileDialogFactory;
     private saveFileDialogFactory: SaveFileDialogFactory;
@@ -36,7 +36,7 @@ export class DialogsMainImpl implements DialogsMain {
     constructor(rpc: RPCProtocol, container: interfaces.Container) {
         this.workspaceService = container.get(WorkspaceService);
         this.fileSystem = container.get(FileSystem);
-        this.labelProvider = container.get(LabelProvider);
+        this.labelProvider = container.get(UriLabelProvider);
 
         this.openFileDialogFactory = container.get(OpenFileDialogFactory);
         this.saveFileDialogFactory = container.get(SaveFileDialogFactory);

@@ -18,7 +18,7 @@ import { injectable, inject, postConstruct } from 'inversify';
 import { CommandContribution, CommandRegistry, MenuContribution, MenuModelRegistry, SelectionService } from '@theia/core/lib/common';
 import { isOSX, environment, OS } from '@theia/core';
 import {
-    open, OpenerService, CommonMenus, StorageService, LabelProvider,
+    open, OpenerService, CommonMenus, StorageService,
     ConfirmDialog, KeybindingRegistry, KeybindingContribution, CommonCommands
 } from '@theia/core/lib/browser';
 import { FileDialogService, OpenFileDialogProps, FileDialogTreeFilters } from '@theia/filesystem/lib/browser';
@@ -39,7 +39,6 @@ export class WorkspaceFrontendContribution implements CommandContribution, Keybi
     @inject(OpenerService) protected readonly openerService: OpenerService;
     @inject(WorkspaceService) protected readonly workspaceService: WorkspaceService;
     @inject(StorageService) protected readonly workspaceStorage: StorageService;
-    @inject(LabelProvider) protected readonly labelProvider: LabelProvider;
     @inject(QuickOpenWorkspace) protected readonly quickOpenWorkspace: QuickOpenWorkspace;
     @inject(FileDialogService) protected readonly fileDialogService: FileDialogService;
     @inject(WorkspacePreferences) protected preferences: WorkspacePreferences;

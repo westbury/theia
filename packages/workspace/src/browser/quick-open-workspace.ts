@@ -15,7 +15,8 @@
  ********************************************************************************/
 
 import { injectable, inject } from 'inversify';
-import { QuickOpenService, QuickOpenModel, QuickOpenItem, QuickOpenGroupItem, QuickOpenMode, LabelProvider } from '@theia/core/lib/browser';
+import { QuickOpenService, QuickOpenModel, QuickOpenItem, QuickOpenGroupItem, QuickOpenMode } from '@theia/core/lib/browser';
+import { FileStatLabelProvider } from '@theia/filesystem/lib/browser/filestat-label-provider';
 import { WorkspaceService } from './workspace-service';
 import { getTemporaryWorkspaceFileUri } from '../common';
 import { WorkspacePreferences } from './workspace-preferences';
@@ -32,7 +33,7 @@ export class QuickOpenWorkspace implements QuickOpenModel {
     @inject(QuickOpenService) protected readonly quickOpenService: QuickOpenService;
     @inject(WorkspaceService) protected readonly workspaceService: WorkspaceService;
     @inject(FileSystem) protected readonly fileSystem: FileSystem;
-    @inject(LabelProvider) protected readonly labelProvider: LabelProvider;
+    @inject(FileStatLabelProvider) protected readonly labelProvider: FileStatLabelProvider;
     @inject(WorkspacePreferences) protected preferences: WorkspacePreferences;
 
     async open(workspaces: string[]): Promise<void> {

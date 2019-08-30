@@ -50,7 +50,8 @@ import {
 } from './shell';
 import { StatusBar, StatusBarImpl } from './status-bar/status-bar';
 import { LabelParser } from './label-parser';
-import { LabelProvider, LabelProviderContribution, DefaultUriLabelProviderContribution } from './label-provider';
+import { LabelProvider } from './label-provider';
+import { UriLabelProviderContribution, DefaultUriLabelProviderContribution } from './uri-label-provider';
 import {
     PreferenceProviderProvider, PreferenceProvider, PreferenceScope, PreferenceService,
     PreferenceServiceImpl, bindPreferenceSchemaProvider, PreferenceSchemaProvider
@@ -213,10 +214,10 @@ export const frontendApplicationModule = new ContainerModule((bind, unbind, isBo
     bind(StatusBar).toService(StatusBarImpl);
     bind(LabelParser).toSelf().inSingletonScope();
 
-    bindContributionProvider(bind, LabelProviderContribution);
+    bindContributionProvider(bind, UriLabelProviderContribution);
     bind(LabelProvider).toSelf().inSingletonScope();
-    bind(LabelProviderContribution).to(DefaultUriLabelProviderContribution).inSingletonScope();
-    bind(LabelProviderContribution).to(DiffUriLabelProviderContribution).inSingletonScope();
+    bind(UriLabelProviderContribution).to(DefaultUriLabelProviderContribution).inSingletonScope();
+    bind(UriLabelProviderContribution).to(DiffUriLabelProviderContribution).inSingletonScope();
 
     bindPreferenceService(bind);
     bind(FrontendApplicationContribution).toService(PreferenceService);

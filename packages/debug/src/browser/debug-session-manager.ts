@@ -18,7 +18,7 @@
 
 import { injectable, inject, postConstruct } from 'inversify';
 import { Emitter, Event, DisposableCollection, MessageService, WaitUntilEvent } from '@theia/core';
-import { LabelProvider } from '@theia/core/lib/browser';
+import { UriLabelProvider } from '@theia/core/lib/browser';
 import { EditorManager } from '@theia/editor/lib/browser';
 import { ContextKeyService, ContextKey } from '@theia/core/lib/browser/context-key-service';
 import { DebugError, DebugService } from '../common/debug-service';
@@ -103,8 +103,8 @@ export class DebugSessionManager {
     @inject(DebugService)
     protected readonly debug: DebugService;
 
-    @inject(LabelProvider)
-    protected readonly labelProvider: LabelProvider;
+    @inject(UriLabelProvider)
+    protected readonly labelProvider: UriLabelProvider;
 
     @inject(EditorManager)
     protected readonly editorManager: EditorManager;

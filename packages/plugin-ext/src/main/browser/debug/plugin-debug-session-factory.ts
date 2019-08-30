@@ -18,7 +18,7 @@ import { DefaultDebugSessionFactory, } from '@theia/debug/lib/browser/debug-sess
 import { TerminalService } from '@theia/terminal/lib/browser/base/terminal-service';
 import { EditorManager } from '@theia/editor/lib/browser/editor-manager';
 import { BreakpointManager } from '@theia/debug/lib/browser/breakpoint/breakpoint-manager';
-import { LabelProvider } from '@theia/core/lib/browser/label-provider';
+import { UriLabelProvider } from '@theia/core/lib/browser/uri-label-provider';
 import { MessageClient } from '@theia/core/lib/common/message-service-protocol';
 import { OutputChannelManager } from '@theia/output/lib/common/output-channel';
 import { DebugPreferences } from '@theia/debug/lib/browser/debug-preferences';
@@ -39,7 +39,7 @@ export class PluginDebugSession extends DebugSession {
         protected readonly terminalServer: TerminalService,
         protected readonly editorManager: EditorManager,
         protected readonly breakpoints: BreakpointManager,
-        protected readonly labelProvider: LabelProvider,
+        protected readonly labelProvider: UriLabelProvider,
         protected readonly messages: MessageClient,
         protected readonly fileSystem: FileSystem,
         protected readonly terminalOptionsExt: TerminalOptionsExt | undefined) {
@@ -61,7 +61,7 @@ export class PluginDebugSessionFactory extends DefaultDebugSessionFactory {
         protected readonly terminalService: TerminalService,
         protected readonly editorManager: EditorManager,
         protected readonly breakpoints: BreakpointManager,
-        protected readonly labelProvider: LabelProvider,
+        protected readonly labelProvider: UriLabelProvider,
         protected readonly messages: MessageClient,
         protected readonly outputChannelManager: OutputChannelManager,
         protected readonly debugPreferences: DebugPreferences,

@@ -15,7 +15,7 @@
  ********************************************************************************/
 
 import { expect } from 'chai';
-import { DefaultUriLabelProviderContribution, FOLDER_ICON } from './label-provider';
+import { DefaultUriLabelProviderContribution, FOLDER_ICON } from './uri-label-provider';
 import URI from '../common/uri';
 
 describe('DefaultUriLabelProviderContribution', function (): void {

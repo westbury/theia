@@ -26,7 +26,7 @@ import { FileSystemWatcher } from '@theia/filesystem/lib/browser/filesystem-watc
 import { FileSystemNode } from '@theia/filesystem/lib/node/node-filesystem';
 import { FileChange } from '@theia/filesystem/lib/browser';
 import { Emitter, CommandService } from '@theia/core';
-import { LocalStorageService, StorageService, LabelProvider } from '@theia/core/lib/browser';
+import { LocalStorageService, StorageService, UriLabelProvider } from '@theia/core/lib/browser';
 import { GitRepositoryProvider } from './git-repository-provider';
 import * as sinon from 'sinon';
 import * as chai from 'chai';
@@ -105,7 +105,7 @@ describe('GitRepositoryProvider', () => {
         testContainer.bind(EditorManager).toConstantValue(<EditorManager>{});
         testContainer.bind(GitErrorHandler).toConstantValue(<GitErrorHandler>{});
         testContainer.bind(CommandService).toConstantValue(<CommandService>{});
-        testContainer.bind(LabelProvider).toConstantValue(<LabelProvider>{});
+        testContainer.bind(UriLabelProvider).toConstantValue(<UriLabelProvider>{});
 
         sinon.stub(mockWorkspaceService, 'onWorkspaceChanged').value(mockRootChangeEmitter.event);
         sinon.stub(mockFileSystemWatcher, 'onFilesChanged').value(mockFileChangeEmitter.event);

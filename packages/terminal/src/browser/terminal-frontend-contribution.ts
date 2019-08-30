@@ -28,7 +28,7 @@ import {
 import { QuickPickService } from '@theia/core/lib/common/quick-pick-service';
 import {
     ApplicationShell, KeybindingContribution, KeyCode, Key,
-    KeybindingRegistry, Widget, LabelProvider, WidgetOpenerOptions
+    KeybindingRegistry, Widget, UriLabelProvider, WidgetOpenerOptions
 } from '@theia/core/lib/browser';
 import { TabBarToolbarContribution, TabBarToolbarRegistry } from '@theia/core/lib/browser/shell/tab-bar-toolbar';
 import { WidgetManager } from '@theia/core/lib/browser';
@@ -99,8 +99,8 @@ export class TerminalFrontendContribution implements TerminalService, CommandCon
         @inject(SelectionService) protected readonly selectionService: SelectionService
     ) { }
 
-    @inject(LabelProvider)
-    protected readonly labelProvider: LabelProvider;
+    @inject(UriLabelProvider)
+    protected readonly labelProvider: UriLabelProvider;
 
     @inject(QuickPickService)
     protected readonly quickPick: QuickPickService;

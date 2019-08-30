@@ -23,7 +23,7 @@ import { WorkspaceCommands, WorkspaceService } from '@theia/workspace/lib/browse
 import { FileStat, FileSystem } from '@theia/filesystem/lib/common/filesystem';
 import { FileSystemUtils } from '@theia/filesystem/lib/common/filesystem-utils';
 import { KeymapsCommands } from '@theia/keymaps/lib/browser';
-import { CommonCommands, LabelProvider } from '@theia/core/lib/browser';
+import { CommonCommands, UriLabelProvider } from '@theia/core/lib/browser';
 import { ApplicationInfo, ApplicationServer } from '@theia/core/lib/common/application-protocol';
 import { FrontendApplicationConfigProvider } from '@theia/core/lib/browser/frontend-application-config-provider';
 
@@ -88,8 +88,8 @@ export class GettingStartedWidget extends ReactWidget {
     @inject(FileSystem)
     protected readonly fileSystem: FileSystem;
 
-    @inject(LabelProvider)
-    protected readonly labelProvider: LabelProvider;
+    @inject(UriLabelProvider)
+    protected readonly labelProvider: UriLabelProvider;
 
     @inject(WorkspaceService)
     protected readonly workspaceService: WorkspaceService;

@@ -14,15 +14,18 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import { DefaultUriLabelProviderContribution, FOLDER_ICON, FILE_ICON } from '@theia/core/lib/browser/label-provider';
+import { LabelProviderContribution } from '@theia/core/lib/browser/label-provider';
+import { FOLDER_ICON, FILE_ICON } from '@theia/core/lib/browser/uri-label-provider';
 import URI from '@theia/core/lib/common/uri';
 import { injectable, inject, postConstruct } from 'inversify';
 import { FileSystem, FileStat } from '@theia/filesystem/lib/common';
 import { MaybePromise } from '@theia/core';
 import { WorkspaceVariableContribution } from './workspace-variable-contribution';
+import { UriLabelProvider } from '@theia/core/lib/browser/uri-label-provider';
+// import * as fileIcons from 'file-icons-js';
 
 @injectable()
-export class WorkspaceUriLabelProviderContribution extends DefaultUriLabelProviderContribution {
+export class WorkspaceUriLabelProviderContribution implements LabelProviderContribution<URI | FileStat> {
 
     @inject(FileSystem)
     protected readonly fileSystem: FileSystem;
@@ -30,12 +33,15 @@ export class WorkspaceUriLabelProviderContribution extends DefaultUriLabelProvid
     @inject(WorkspaceVariableContribution)
     protected readonly workspaceVariable: WorkspaceVariableContribution;
 
+    @inject(UriLabelProvider)
+    protected readonly uriLabelProvider: UriLabelProvider;
+
     @postConstruct()
     protected async init(): Promise<void> {
         // no-op, backward compatibility
     }
 
-    canHandle(element: object): number {
+    canHandle(element: URI | FileStat): number {
         if ((element instanceof URI && element.scheme === 'file' || FileStat.is(element))) {
             return 10;
         }
@@ -61,7 +67,7 @@ export class WorkspaceUriLabelProviderContribution extends DefaultUriLabelProvid
             return FOLDER_ICON;
         }
         const uri = this.getUri(element);
-        const icon = super.getFileIcon(uri);
+        const icon = this.getFileIcon(uri);
         if (!icon) {
             try {
                 const stat = await this.getStat(element);
@@ -73,8 +79,16 @@ export class WorkspaceUriLabelProviderContribution extends DefaultUriLabelProvid
         return icon;
     }
 
+    private getFileIcon(uri: URI): string | undefined {
+        // TODO
+        // return fileIcons.getClassWithColor(uri.displayName);
+        return undefined;
+    }
+
     getName(element: URI | FileStat): string {
-        return super.getName(this.getUri(element));
+        // TODO pass this on the next lower priority
+        const uri = this.getUri(element);
+        return this.uriLabelProvider.getName(uri);
     }
 
     /**
@@ -83,6 +97,7 @@ export class WorkspaceUriLabelProviderContribution extends DefaultUriLabelProvid
     getLongName(element: URI | FileStat): string {
         const uri = this.getUri(element);
         const relativePath = this.workspaceVariable.getWorkspaceRelativePath(uri);
-        return relativePath || super.getLongName(uri);
+        // TODO pass on to next lower priority
+        return relativePath || this.uriLabelProvider.getLongName(uri);
     }
 }

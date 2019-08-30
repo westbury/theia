@@ -25,7 +25,7 @@ import {
     TreeModel,
     TreeNode,
     NodeProps,
-    LabelProvider,
+    UriLabelProvider,
     TreeProps,
     TreeExpansionService,
     ApplicationShell,
@@ -114,7 +114,7 @@ export class SearchInWorkspaceResultTreeWidget extends TreeWidget {
     @inject(EditorManager) protected readonly editorManager: EditorManager;
     @inject(FileResourceResolver) protected readonly fileResourceResolver: FileResourceResolver;
     @inject(ApplicationShell) protected readonly shell: ApplicationShell;
-    @inject(LabelProvider) protected readonly labelProvider: LabelProvider;
+    @inject(UriLabelProvider) protected readonly labelProvider: UriLabelProvider;
     @inject(WorkspaceService) protected readonly workspaceService: WorkspaceService;
     @inject(TreeExpansionService) protected readonly expansionService: TreeExpansionService;
     @inject(SearchInWorkspacePreferences) protected readonly searchInWorkspacePreferences: SearchInWorkspacePreferences;

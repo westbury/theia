@@ -25,7 +25,7 @@ import { DebugConfigurationManager } from './debug-configuration-manager';
 import { DebugCommands } from './debug-frontend-application-contribution';
 import { DebugSessionOptions } from './debug-session-options';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
-import { LabelProvider } from '@theia/core/lib/browser/label-provider';
+import { UriLabelProvider } from '@theia/core/lib/browser/uri-label-provider';
 import URI from '@theia/core/lib/common/uri';
 
 @injectable()
@@ -46,8 +46,8 @@ export class DebugPrefixConfiguration implements CommandContribution, CommandHan
     @inject(WorkspaceService)
     protected readonly workspaceService: WorkspaceService;
 
-    @inject(LabelProvider)
-    protected readonly labelProvider: LabelProvider;
+    @inject(UriLabelProvider)
+    protected readonly labelProvider: UriLabelProvider;
 
     readonly prefix = 'debug ';
     readonly description = 'Debug Configuration';

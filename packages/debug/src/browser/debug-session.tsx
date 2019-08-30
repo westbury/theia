@@ -17,7 +17,7 @@
 // tslint:disable:no-any
 
 import * as React from 'react';
-import { LabelProvider } from '@theia/core/lib/browser';
+import { UriLabelProvider } from '@theia/core/lib/browser';
 import { DebugProtocol } from 'vscode-debugprotocol';
 import { Emitter, Event, DisposableCollection, Disposable, MessageClient, MessageType, Mutable } from '@theia/core/lib/common';
 import { TerminalService } from '@theia/terminal/lib/browser/base/terminal-service';
@@ -69,7 +69,7 @@ export class DebugSession implements CompositeTreeElement {
         protected readonly terminalServer: TerminalService,
         protected readonly editorManager: EditorManager,
         protected readonly breakpoints: BreakpointManager,
-        protected readonly labelProvider: LabelProvider,
+        protected readonly labelProvider: UriLabelProvider,
         protected readonly messages: MessageClient,
         protected readonly fileSystem: FileSystem) {
         this.connection.onRequest('runInTerminal', (request: DebugProtocol.RunInTerminalRequest) => this.runInTerminal(request));

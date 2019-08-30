@@ -28,7 +28,7 @@ import {
     SaveFileDialog
 } from '@theia/filesystem/lib/browser';
 import { StorageService } from '@theia/core/lib/browser/storage-service';
-import { LabelProviderContribution } from '@theia/core/lib/browser/label-provider';
+import { FileStatLabelProviderContribution } from '@theia/filesystem/lib/browser/filestat-label-provider';
 import { VariableContribution } from '@theia/variable-resolver/lib/browser';
 import { WorkspaceServer, workspacePath } from '../common';
 import { WorkspaceFrontendContribution } from './workspace-frontend-contribution';
@@ -82,7 +82,7 @@ export default new ContainerModule((bind: interfaces.Bind, unbind: interfaces.Un
     bind(WorkspaceStorageService).toSelf().inSingletonScope();
     rebind(StorageService).toService(WorkspaceStorageService);
 
-    bind(LabelProviderContribution).to(WorkspaceUriLabelProviderContribution).inSingletonScope();
+    bind(FileStatLabelProviderContribution).to(WorkspaceUriLabelProviderContribution).inSingletonScope();
     bind(WorkspaceVariableContribution).toSelf().inSingletonScope();
     bind(VariableContribution).toService(WorkspaceVariableContribution);
 

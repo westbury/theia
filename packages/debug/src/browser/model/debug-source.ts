@@ -14,7 +14,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import { LabelProvider } from '@theia/core/lib/browser';
+import { UriLabelProvider } from '@theia/core/lib/browser';
 import { EditorManager, EditorOpenerOptions, EditorWidget } from '@theia/editor/lib/browser';
 import URI from '@theia/core/lib/common/uri';
 import { DebugProtocol } from 'vscode-debugprotocol/lib/debugProtocol';
@@ -30,7 +30,7 @@ export class DebugSource extends DebugSourceData {
     constructor(
         protected readonly session: DebugSession,
         protected readonly editorManager: EditorManager,
-        protected readonly labelProvider: LabelProvider
+        protected readonly labelProvider: UriLabelProvider
     ) {
         super();
     }

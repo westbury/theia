@@ -14,7 +14,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import { AbstractViewContribution, KeybindingRegistry, LabelProvider, CommonMenus, FrontendApplication, FrontendApplicationContribution } from '@theia/core/lib/browser';
+import { AbstractViewContribution, KeybindingRegistry, UriLabelProvider, CommonMenus, FrontendApplication, FrontendApplicationContribution } from '@theia/core/lib/browser';
 import { SearchInWorkspaceWidget } from './search-in-workspace-widget';
 import { injectable, inject, postConstruct } from 'inversify';
 import { CommandRegistry, MenuModelRegistry, SelectionService, Command } from '@theia/core';
@@ -69,7 +69,7 @@ export namespace SearchInWorkspaceCommands {
 export class SearchInWorkspaceFrontendContribution extends AbstractViewContribution<SearchInWorkspaceWidget> implements FrontendApplicationContribution, TabBarToolbarContribution {
 
     @inject(SelectionService) protected readonly selectionService: SelectionService;
-    @inject(LabelProvider) protected readonly labelProvider: LabelProvider;
+    @inject(UriLabelProvider) protected readonly labelProvider: UriLabelProvider;
     @inject(WorkspaceService) protected readonly workspaceService: WorkspaceService;
     @inject(FileSystem) protected readonly fileSystem: FileSystem;
     @inject(EditorManager) protected readonly editorManager: EditorManager;

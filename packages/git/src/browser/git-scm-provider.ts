@@ -21,7 +21,7 @@ import { Emitter } from '@theia/core/lib/common/event';
 import { CancellationToken } from '@theia/core/lib/common/cancellation';
 import { DisposableCollection } from '@theia/core/lib/common/disposable';
 import { CommandService } from '@theia/core/lib/common/command';
-import { LabelProvider } from '@theia/core/lib/browser/label-provider';
+import { UriLabelProvider } from '@theia/core/lib/browser/uri-label-provider';
 import { ConfirmDialog } from '@theia/core/lib/browser/dialogs';
 import { EditorOpenerOptions, EditorManager } from '@theia/editor/lib/browser/editor-manager';
 import { FileSystem } from '@theia/filesystem/lib/common';
@@ -69,8 +69,8 @@ export class GitScmProvider implements ScmProvider {
     @inject(CommandService)
     protected readonly commands: CommandService;
 
-    @inject(LabelProvider)
-    protected readonly labelProvider: LabelProvider;
+    @inject(UriLabelProvider)
+    protected readonly labelProvider: UriLabelProvider;
 
     @inject(GitScmProviderOptions)
     protected readonly options: GitScmProviderOptions;

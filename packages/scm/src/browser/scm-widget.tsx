@@ -28,7 +28,7 @@ import { MenuModelRegistry, ActionMenuNode, CompositeMenuNode, MenuPath } from '
 import { DisposableCollection, Disposable } from '@theia/core/lib/common/disposable';
 import {
     ContextMenuRenderer, SELECTED_CLASS, StorageService,
-    ReactWidget, Key, LabelProvider, DiffUris, KeybindingRegistry, Widget, StatefulWidget
+    ReactWidget, Key, UriLabelProvider, DiffUris, KeybindingRegistry, Widget, StatefulWidget
 } from '@theia/core/lib/browser';
 import { AlertMessage } from '@theia/core/lib/browser/widgets/alert-message';
 import { EditorManager, DiffNavigatorProvider, EditorWidget } from '@theia/editor/lib/browser';
@@ -59,7 +59,7 @@ export class ScmWidget extends ReactWidget implements StatefulWidget {
     @inject(ContextMenuRenderer) protected readonly contextMenuRenderer: ContextMenuRenderer;
     @inject(ScmAvatarService) protected readonly avatarService: ScmAvatarService;
     @inject(StorageService) protected readonly storageService: StorageService;
-    @inject(LabelProvider) protected readonly labelProvider: LabelProvider;
+    @inject(UriLabelProvider) protected readonly labelProvider: UriLabelProvider;
     @inject(EditorManager) protected readonly editorManager: EditorManager;
     @inject(DiffNavigatorProvider) protected readonly diffNavigatorProvider: DiffNavigatorProvider;
 
@@ -377,7 +377,7 @@ export namespace ScmWidget {
         commands: CommandRegistry;
         menus: MenuModelRegistry;
         contextKeys: ScmContextKeyService;
-        labelProvider: LabelProvider;
+        labelProvider: UriLabelProvider;
         contextMenuRenderer: ContextMenuRenderer
     }
 

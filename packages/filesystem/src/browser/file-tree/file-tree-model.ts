@@ -21,12 +21,12 @@ import { FileSystem } from '../../common';
 import { FileSystemWatcher, FileChangeType, FileChange, FileMoveEvent } from '../filesystem-watcher';
 import { FileStatNode, DirNode, FileNode } from './file-tree';
 import { LocationService } from '../location';
-import { LabelProvider } from '@theia/core/lib/browser/label-provider';
+import { FileStatLabelProvider } from '../filestat-label-provider';
 
 @injectable()
 export class FileTreeModel extends TreeModelImpl implements LocationService {
 
-    @inject(LabelProvider) protected readonly labelProvider: LabelProvider;
+    @inject(FileStatLabelProvider) protected readonly labelProvider: FileStatLabelProvider;
     @inject(FileSystem) protected readonly fileSystem: FileSystem;
     @inject(FileSystemWatcher) protected readonly watcher: FileSystemWatcher;
 

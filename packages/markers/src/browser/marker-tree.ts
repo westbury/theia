@@ -20,7 +20,7 @@ import { MarkerManager } from './marker-manager';
 import { Marker } from '../common/marker';
 import { UriSelection } from '@theia/core/lib/common/selection';
 import URI from '@theia/core/lib/common/uri';
-import { LabelProvider } from '@theia/core/lib/browser/label-provider';
+import { UriLabelProvider } from '@theia/core/lib/browser/uri-label-provider';
 import { ProblemSelection } from './problem/problem-selection';
 
 export const MarkerOptions = Symbol('MarkerOptions');
@@ -34,7 +34,7 @@ export abstract class MarkerTree<T extends object> extends TreeImpl {
     constructor(
         protected readonly markerManager: MarkerManager<T>,
         protected readonly markerOptions: MarkerOptions,
-        protected readonly labelProvider: LabelProvider
+        protected readonly labelProvider: UriLabelProvider
     ) {
         super();
 

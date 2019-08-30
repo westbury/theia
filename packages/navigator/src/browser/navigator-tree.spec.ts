@@ -19,7 +19,7 @@ let disableJSDOM = enableJSDOM();
 
 import { Container } from 'inversify';
 import { Emitter } from '@theia/core';
-import { CompositeTreeNode, LabelProvider, TreeNode } from '@theia/core/lib/browser';
+import { CompositeTreeNode, UriLabelProvider, TreeNode } from '@theia/core/lib/browser';
 import { FileSystem, FileStat } from '@theia/filesystem/lib/common';
 import { FileSystemNode } from '@theia/filesystem/lib/node/node-filesystem';
 import { DirNode, FileTree } from '@theia/filesystem/lib/browser';
@@ -66,7 +66,7 @@ describe('FileNavigatorTree', () => {
 
     let mockFileNavigatorFilter: FileNavigatorFilter;
     let mockFilesystem: FileSystem;
-    let mockLabelProvider: LabelProvider;
+    let mockLabelProvider: UriLabelProvider;
 
     const mockFilterChangeEmitter: Emitter<void> = new Emitter();
 
@@ -82,13 +82,13 @@ describe('FileNavigatorTree', () => {
     beforeEach(() => {
         mockFileNavigatorFilter = sinon.createStubInstance(FileNavigatorFilter);
         mockFilesystem = sinon.createStubInstance(FileSystemNode);
-        mockLabelProvider = sinon.createStubInstance(LabelProvider);
+        mockLabelProvider = sinon.createStubInstance(UriLabelProvider);
 
         testContainer = new Container();
         testContainer.bind(FileNavigatorTree).toSelf().inSingletonScope();
         testContainer.bind(FileNavigatorFilter).toConstantValue(mockFileNavigatorFilter);
         testContainer.bind(FileSystem).toConstantValue(mockFilesystem);
-        testContainer.bind(LabelProvider).toConstantValue(mockLabelProvider);
+        testContainer.bind(UriLabelProvider).toConstantValue(mockLabelProvider);
 
         sinon.stub(mockFileNavigatorFilter, 'onFilterChanged').value(mockFilterChangeEmitter.event);
         setup();

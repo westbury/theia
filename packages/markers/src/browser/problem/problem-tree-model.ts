@@ -21,14 +21,14 @@ import { MarkerTreeModel } from '../marker-tree-model';
 import { injectable, inject } from 'inversify';
 import { OpenerOptions, TreeNode } from '@theia/core/lib/browser';
 import { Diagnostic } from 'vscode-languageserver-types';
-import { LabelProvider } from '@theia/core/lib/browser/label-provider';
+import { UriLabelProvider } from '@theia/core/lib/browser/uri-label-provider';
 
 @injectable()
 export class ProblemTree extends MarkerTree<Diagnostic> {
     constructor(
         @inject(ProblemManager) protected readonly problemManager: ProblemManager,
         @inject(MarkerOptions) protected readonly markerOptions: MarkerOptions,
-        @inject(LabelProvider) protected readonly labelProvider: LabelProvider) {
+        @inject(UriLabelProvider) protected readonly labelProvider: UriLabelProvider) {
         super(problemManager, markerOptions, labelProvider);
     }
 }

@@ -16,7 +16,8 @@
 
 import { injectable, inject } from 'inversify';
 import URI from '../common/uri';
-import { LabelProviderContribution, LabelProvider } from './label-provider';
+import { LabelProviderContribution } from './label-provider';
+import { UriLabelProvider } from './uri-label-provider';
 
 export namespace DiffUris {
 
@@ -48,9 +49,9 @@ export namespace DiffUris {
 }
 
 @injectable()
-export class DiffUriLabelProviderContribution implements LabelProviderContribution {
+export class DiffUriLabelProviderContribution implements LabelProviderContribution<URI> {
 
-    constructor(@inject(LabelProvider) protected labelProvider: LabelProvider) { }
+    constructor(@inject(UriLabelProvider) protected labelProvider: UriLabelProvider) { }
 
     canHandle(element: object): number {
         if (element instanceof URI && DiffUris.isDiffUri(element)) {

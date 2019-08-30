@@ -29,20 +29,20 @@ import { RPCProtocol } from '../../common/rpc-protocol';
 import { interfaces } from 'inversify';
 import { CancellationToken, DisposableCollection, Emitter, Event } from '@theia/core';
 import URI from '@theia/core/lib/common/uri';
-import { LabelProvider } from '@theia/core/lib/browser';
+import { UriLabelProvider } from '@theia/core/lib/browser';
 import { ScmNavigatorDecorator } from '@theia/scm/lib/browser/decorations/scm-navigator-decorator';
 
 export class ScmMainImpl implements ScmMain {
     private readonly proxy: ScmExt;
     private readonly scmService: ScmService;
     private readonly scmRepositoryMap: Map<number, ScmRepository>;
-    private readonly labelProvider: LabelProvider;
+    private readonly labelProvider: UriLabelProvider;
 
     constructor(rpc: RPCProtocol, container: interfaces.Container) {
         this.proxy = rpc.getProxy(MAIN_RPC_CONTEXT.SCM_EXT);
         this.scmService = container.get(ScmService);
         this.scmRepositoryMap = new Map();
-        this.labelProvider = container.get(LabelProvider);
+        this.labelProvider = container.get(UriLabelProvider);
     }
 
     async $registerSourceControl(sourceControlHandle: number, id: string, label: string, rootUri: string): Promise<void> {
@@ -138,7 +138,7 @@ export class PluginScmProvider implements ScmProvider {
         readonly id: string,
         readonly label: string,
         readonly rootUri: string,
-        protected readonly labelProvider: LabelProvider
+        protected readonly labelProvider: UriLabelProvider
     ) {
         this.disposableCollection.push(this.onDidChangeEmitter);
         this.disposableCollection.push(this.onDidChangeCommitTemplateEmitter);

@@ -18,7 +18,8 @@ import { injectable, inject, postConstruct } from 'inversify';
 import URI from '@theia/core/lib/common/uri';
 import { Path } from '@theia/core/lib/common/path';
 import { MessageService, Command, Emitter, Event, UriSelection } from '@theia/core/lib/common';
-import { LabelProvider, isNative, AbstractDialog } from '@theia/core/lib/browser';
+import { isNative, AbstractDialog } from '@theia/core/lib/browser';
+import { FileStatLabelProvider } from '@theia/filesystem/lib/browser/filestat-label-provider';
 import { WindowService } from '@theia/core/lib/browser/window/window-service';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
 import { FileSystem } from '@theia/filesystem/lib/common';
@@ -105,8 +106,8 @@ export class HostedPluginManagerClient {
     protected readonly messageService: MessageService;
     @inject(OpenFileDialogFactory)
     protected readonly openFileDialogFactory: OpenFileDialogFactory;
-    @inject(LabelProvider)
-    protected readonly labelProvider: LabelProvider;
+    @inject(FileStatLabelProvider)
+    protected readonly labelProvider: FileStatLabelProvider;
     @inject(WindowService)
     protected readonly windowService: WindowService;
     @inject(FileSystem)

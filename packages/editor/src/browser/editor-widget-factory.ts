@@ -17,7 +17,7 @@
 import { injectable, inject, } from 'inversify';
 import URI from '@theia/core/lib/common/uri';
 import { SelectionService } from '@theia/core/lib/common';
-import { NavigatableWidgetOptions, WidgetFactory, LabelProvider } from '@theia/core/lib/browser';
+import { NavigatableWidgetOptions, WidgetFactory, UriLabelProvider } from '@theia/core/lib/browser';
 import { EditorWidget } from './editor-widget';
 import { TextEditorProvider } from './editor';
 
@@ -28,8 +28,8 @@ export class EditorWidgetFactory implements WidgetFactory {
 
     readonly id = EditorWidgetFactory.ID;
 
-    @inject(LabelProvider)
-    protected readonly labelProvider: LabelProvider;
+    @inject(UriLabelProvider)
+    protected readonly labelProvider: UriLabelProvider;
 
     @inject(TextEditorProvider)
     protected readonly editorProvider: TextEditorProvider;

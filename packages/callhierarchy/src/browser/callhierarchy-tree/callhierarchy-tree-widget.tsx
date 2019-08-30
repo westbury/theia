@@ -19,7 +19,7 @@ import {
     ContextMenuRenderer, TreeWidget, NodeProps, TreeProps, TreeNode,
     TreeModel, DockPanel
 } from '@theia/core/lib/browser';
-import { LabelProvider } from '@theia/core/lib/browser/label-provider';
+import { UriLabelProvider } from '@theia/core/lib/browser/uri-label-provider';
 import { DefinitionNode, CallerNode } from './callhierarchy-tree';
 import { CallHierarchyTreeModel } from './callhierarchy-tree-model';
 import { CALLHIERARCHY_ID, Definition, Caller } from '../callhierarchy';
@@ -39,7 +39,7 @@ export class CallHierarchyTreeWidget extends TreeWidget {
         @inject(TreeProps) readonly props: TreeProps,
         @inject(CallHierarchyTreeModel) readonly model: CallHierarchyTreeModel,
         @inject(ContextMenuRenderer) contextMenuRenderer: ContextMenuRenderer,
-        @inject(LabelProvider) protected readonly labelProvider: LabelProvider,
+        @inject(UriLabelProvider) protected readonly labelProvider: UriLabelProvider,
         @inject(EditorManager) readonly editorManager: EditorManager
     ) {
         super(props, model, contextMenuRenderer);

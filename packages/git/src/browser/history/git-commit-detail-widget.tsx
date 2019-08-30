@@ -16,7 +16,7 @@
 
 import { injectable, inject } from 'inversify';
 import { Widget } from '@phosphor/widgets';
-import { LabelProvider } from '@theia/core/lib/browser';
+import { UriLabelProvider } from '@theia/core/lib/browser';
 import { Git, GitFileChange } from '../../common';
 import { GitDiffWidget } from '../diff/git-diff-widget';
 import { GitRepositoryProvider } from '../git-repository-provider';
@@ -47,7 +47,7 @@ export class GitCommitDetailWidget extends GitDiffWidget {
 
     constructor(
         @inject(GitRepositoryProvider) protected readonly repositoryProvider: GitRepositoryProvider,
-        @inject(LabelProvider) protected readonly labelProvider: LabelProvider,
+        @inject(UriLabelProvider) protected readonly labelProvider: UriLabelProvider,
         @inject(GitCommitDetailWidgetOptions) protected readonly commitDetailOptions: GitCommitDetailWidgetOptions
     ) {
         super();

@@ -18,7 +18,7 @@ import { injectable, inject, postConstruct } from 'inversify';
 import { Message } from '@phosphor/messaging';
 import URI from '@theia/core/lib/common/uri';
 import { CommandService, SelectionService } from '@theia/core/lib/common';
-import { CommonCommands, CorePreferences, LabelProvider, ViewContainerTitleOptions } from '@theia/core/lib/browser';
+import { CommonCommands, CorePreferences, UriLabelProvider, ViewContainerTitleOptions } from '@theia/core/lib/browser';
 import {
     ContextMenuRenderer, ExpandableTreeNode,
     TreeProps, TreeModel, TreeNode,
@@ -50,7 +50,7 @@ export class FileNavigatorWidget extends FileTreeWidget {
 
     @inject(CorePreferences) protected readonly corePreferences: CorePreferences;
 
-    @inject(LabelProvider) protected readonly labelProvider: LabelProvider;
+    @inject(UriLabelProvider) protected readonly labelProvider: UriLabelProvider;
 
     @inject(NavigatorContextKeyService)
     protected readonly contextKeyService: NavigatorContextKeyService;

@@ -18,7 +18,7 @@ import { injectable, inject, postConstruct } from 'inversify';
 import * as tsp from 'typescript/lib/protocol';
 import { Commands } from 'typescript-language-server/lib/commands';
 import {
-    QuickPickService, KeybindingRegistry, KeybindingContribution, QuickPickItem, StorageService, LabelProvider, FrontendApplicationContribution, StatusBar, StatusBarAlignment
+    QuickPickService, KeybindingRegistry, KeybindingContribution, QuickPickItem, StorageService, UriLabelProvider, FrontendApplicationContribution, StatusBar, StatusBarAlignment
 } from '@theia/core/lib/browser';
 import { ExecuteCommandRequest } from '@theia/languages/lib/browser';
 import { FileSystemWatcher, FileMoveEvent } from '@theia/filesystem/lib/browser';
@@ -71,8 +71,8 @@ export class TypeScriptFrontendContribution implements FrontendApplicationContri
     @inject(FileSystemWatcher)
     protected readonly fileSystemWatcher: FileSystemWatcher;
 
-    @inject(LabelProvider)
-    protected readonly labelProvider: LabelProvider;
+    @inject(UriLabelProvider)
+    protected readonly labelProvider: UriLabelProvider;
 
     @inject(StorageService)
     protected readonly storage: StorageService;

@@ -24,7 +24,8 @@ import { Signal } from '@phosphor/signaling';
 import { ApplicationShell } from '@theia/core/lib/browser';
 import { FileStat, FileSystem } from '@theia/filesystem/lib/common/filesystem';
 import { MockFilesystem } from '@theia/filesystem/lib/common/test';
-import { FOLDER_ICON, FILE_ICON, DefaultUriLabelProviderContribution } from '@theia/core/lib/browser/label-provider';
+import { FOLDER_ICON, FILE_ICON } from '@theia/core/lib/browser/uri-label-provider';
+// import { FileStatLabelProviderContribution } from '@theia/filesystem/lib/browser/filestat-label-provider';
 import { WorkspaceUriLabelProviderContribution } from './workspace-uri-contribution';
 import URI from '@theia/core/lib/common/uri';
 import { WorkspaceVariableContribution } from './workspace-variable-contribution';
@@ -45,7 +46,7 @@ beforeEach(() => {
     container = new Container();
     container.bind(ApplicationShell).toConstantValue({
         currentChanged: new Signal({})
-    // tslint:disable-next-line:no-any
+        // tslint:disable-next-line:no-any
     } as any);
     const workspaceService = new WorkspaceService();
     workspaceService.tryGetRoots = () => roots;
@@ -73,7 +74,7 @@ describe('WorkspaceUriLabelProviderContribution class', () => {
     describe('canHandle()', () => {
         it('should return 0 if the passed in argument is not a FileStat or URI with the "file" scheme', () => {
             expect(labelProvider.canHandle(new URI('user_storage:settings.json'))).eq(0);
-            expect(labelProvider.canHandle({ uri: 'file:///home/settings.json' })).eq(0);
+            expect(labelProvider.canHandle({ uri: 'file:///home/settings.json', isDirectory: false, lastModification: 42 })).eq(0);
         });
 
         it('should return 10 if the passed in argument is a FileStat or URI with the "file" scheme', () => {
@@ -109,7 +110,7 @@ describe('WorkspaceUriLabelProviderContribution class', () => {
             };
             stubs.push(sinon.stub(fs, 'getFileStat').resolves(stat));
             // tslint:disable-next-line:no-any
-            stubs.push(sinon.stub(DefaultUriLabelProviderContribution.prototype, <any>'getFileIcon').returns(undefined));
+            // stubs.push(sinon.stub(DefaultUriLabelProviderContribution.prototype, <any>'getFileIcon').returns(undefined));
             expect(await labelProvider.getIcon(stat)).eq(FILE_ICON);
         });
 
@@ -120,7 +121,7 @@ describe('WorkspaceUriLabelProviderContribution class', () => {
                 isDirectory: true
             }));
             // tslint:disable-next-line:no-any
-            stubs.push(sinon.stub(DefaultUriLabelProviderContribution.prototype, <any>'getFileIcon').returns(undefined));
+            // stubs.push(sinon.stub(DefaultUriLabelProviderContribution.prototype, <any>'getFileIcon').returns(undefined));
             expect(await labelProvider.getIcon(new URI('file:///home/test'))).eq(FOLDER_ICON);
         });
 
@@ -131,7 +132,7 @@ describe('WorkspaceUriLabelProviderContribution class', () => {
                 isDirectory: false
             }));
             // tslint:disable-next-line:no-any
-            stubs.push(sinon.stub(DefaultUriLabelProviderContribution.prototype, <any>'getFileIcon').returns(undefined));
+            // stubs.push(sinon.stub(DefaultUriLabelProviderContribution.prototype, <any>'getFileIcon').returns(undefined));
             expect(await labelProvider.getIcon(new URI('file:///home/test'))).eq(FILE_ICON);
         });
 
@@ -143,7 +144,7 @@ describe('WorkspaceUriLabelProviderContribution class', () => {
         it('should return what getFileIcon() returns from a URI or non-folder FileStat, if getFileIcon() does not return null or undefined', async () => {
             const ret = 'TestString';
             // tslint:disable-next-line:no-any
-            stubs.push(sinon.stub(DefaultUriLabelProviderContribution.prototype, <any>'getFileIcon').returns(ret));
+            // stubs.push(sinon.stub(DefaultUriLabelProviderContribution.prototype, <any>'getFileIcon').returns(ret));
             expect(await labelProvider.getIcon(new URI('file:///home/test'))).eq(ret);
             expect(await labelProvider.getIcon(<FileStat>{
                 uri: 'file:///home/test',

@@ -18,7 +18,7 @@ import { SELECTED_CLASS, Key } from '@theia/core/lib/browser';
 import { GitFileStatus, Repository, GitFileChange } from '../common';
 import URI from '@theia/core/lib/common/uri';
 import { GitRepositoryProvider } from './git-repository-provider';
-import { LabelProvider } from '@theia/core/lib/browser/label-provider';
+import { UriLabelProvider } from '@theia/core/lib/browser/uri-label-provider';
 import { Message } from '@phosphor/messaging';
 import { ElementExt } from '@phosphor/domutils';
 import { inject, injectable } from 'inversify';
@@ -32,7 +32,7 @@ export abstract class GitNavigableListWidget<T extends { selected?: boolean }> e
     private _scrollContainer: string;
 
     @inject(GitRepositoryProvider) protected readonly repositoryProvider: GitRepositoryProvider;
-    @inject(LabelProvider) protected readonly labelProvider: LabelProvider;
+    @inject(UriLabelProvider) protected readonly labelProvider: UriLabelProvider;
 
     constructor() {
         super();

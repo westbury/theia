@@ -21,7 +21,7 @@ import { MaybePromise } from '@theia/core/lib/common';
 import { injectable } from 'inversify';
 
 @injectable()
-export class JavaLabelProviderContribution implements LabelProviderContribution {
+export class JavaLabelProviderContribution implements LabelProviderContribution<URI> {
 
     canHandle(element: object): number {
         if (element instanceof URI && element.scheme === JAVA_SCHEME) {

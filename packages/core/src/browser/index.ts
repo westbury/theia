@@ -34,6 +34,7 @@ export * from './preferences';
 export * from './keybinding';
 export * from './status-bar';
 export * from './label-provider';
+export * from './uri-label-provider';
 export * from './widget-open-handler';
 export * from './navigatable';
 export * from './diff-uris';

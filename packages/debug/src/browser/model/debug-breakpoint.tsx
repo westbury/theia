@@ -19,7 +19,7 @@ import { DebugProtocol } from 'vscode-debugprotocol/lib/debugProtocol';
 import { RecursivePartial } from '@theia/core';
 import URI from '@theia/core/lib/common/uri';
 import { EditorManager, Range } from '@theia/editor/lib/browser';
-import { LabelProvider, DISABLED_CLASS, WidgetOpenerOptions } from '@theia/core/lib/browser';
+import { UriLabelProvider, DISABLED_CLASS, WidgetOpenerOptions } from '@theia/core/lib/browser';
 import { TreeElement } from '@theia/core/lib/browser/source-tree';
 import { DebugSession } from '../debug-session';
 import { SourceBreakpoint } from '../breakpoint/breakpoint-marker';
@@ -42,7 +42,7 @@ export class DebugBreakpoint extends DebugBreakpointData implements TreeElement 
 
     constructor(
         origin: SourceBreakpoint,
-        protected readonly labelProvider: LabelProvider,
+        protected readonly labelProvider: UriLabelProvider,
         protected readonly breakpoints: BreakpointManager,
         protected readonly editorManager: EditorManager,
         protected readonly session?: DebugSession

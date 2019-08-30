@@ -18,7 +18,7 @@ import { injectable, inject } from 'inversify';
 import URI from '@theia/core/lib/common/uri';
 import { TreeNode, CompositeTreeNode, SelectableTreeNode, ExpandableTreeNode, TreeImpl } from '@theia/core/lib/browser';
 import { FileSystem, FileStat } from '../../common';
-import { LabelProvider } from '@theia/core/lib/browser/label-provider';
+import { UriLabelProvider } from '@theia/core/lib/browser/uri-label-provider';
 import { UriSelection } from '@theia/core/lib/common/selection';
 import { FileSelection } from '../file-selection';
 
@@ -26,7 +26,7 @@ import { FileSelection } from '../file-selection';
 export class FileTree extends TreeImpl {
 
     @inject(FileSystem) protected readonly fileSystem: FileSystem;
-    @inject(LabelProvider) protected readonly labelProvider: LabelProvider;
+    @inject(UriLabelProvider) protected readonly labelProvider: UriLabelProvider;
 
     async resolveChildren(parent: CompositeTreeNode): Promise<TreeNode[]> {
         if (FileStatNode.is(parent)) {
@@ -62,7 +62,8 @@ export class FileTree extends TreeImpl {
     protected async toNode(fileStat: FileStat, parent: CompositeTreeNode): Promise<FileNode | DirNode> {
         const uri = new URI(fileStat.uri);
         const name = await this.labelProvider.getName(uri);
-        const icon = await this.labelProvider.getIcon(fileStat);
+        const icon = await this.labelProvider.getIcon(uri);
+        // const icon = await this.labelProvider.getIcon(fileStat);
         const id = this.toNodeId(uri, parent);
         const node = this.getNode(id);
         if (fileStat.isDirectory) {

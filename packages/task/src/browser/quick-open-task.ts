@@ -20,7 +20,7 @@ import { ContributedTaskConfiguration, TaskInfo, TaskConfiguration } from '../co
 import { TaskDefinitionRegistry } from './task-definition-registry';
 import URI from '@theia/core/lib/common/uri';
 import { TaskActionProvider } from './task-action-provider';
-import { LabelProvider, QuickOpenHandler, QuickOpenService, QuickOpenOptions } from '@theia/core/lib/browser';
+import { UriLabelProvider, QuickOpenHandler, QuickOpenService, QuickOpenOptions } from '@theia/core/lib/browser';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
 import { TerminalService } from '@theia/terminal/lib/browser/base/terminal-service';
 import { QuickOpenModel, QuickOpenItem, QuickOpenActionProvider, QuickOpenMode, QuickOpenGroupItem, QuickOpenGroupItemOptions } from '@theia/core/lib/common/quick-open-model';
@@ -44,8 +44,8 @@ export class QuickOpenTask implements QuickOpenModel, QuickOpenHandler {
     @inject(TaskActionProvider)
     protected readonly taskActionProvider: TaskActionProvider;
 
-    @inject(LabelProvider)
-    protected readonly labelProvider: LabelProvider;
+    @inject(UriLabelProvider)
+    protected readonly labelProvider: UriLabelProvider;
 
     @inject(WorkspaceService)
     protected readonly workspaceService: WorkspaceService;
@@ -319,7 +319,7 @@ export class TaskConfigureQuickOpenItem extends QuickOpenGroupItem {
     constructor(
         protected readonly task: TaskConfiguration,
         protected readonly taskService: TaskService,
-        protected readonly labelProvider: LabelProvider,
+        protected readonly labelProvider: UriLabelProvider,
         protected readonly workspaceService: WorkspaceService,
         protected readonly isMulti: boolean
     ) {

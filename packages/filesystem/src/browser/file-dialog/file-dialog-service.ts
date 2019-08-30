@@ -17,7 +17,7 @@
 import { injectable, inject } from 'inversify';
 import URI from '@theia/core/lib/common/uri';
 import { MaybeArray } from '@theia/core/lib/common';
-import { LabelProvider } from '@theia/core/lib/browser';
+import { FileStatLabelProvider } from '../../browser/filestat-label-provider';
 import { FileSystem, FileStat } from '../../common';
 import { DirNode } from '../file-tree';
 import { OpenFileDialogFactory, OpenFileDialogProps, SaveFileDialogFactory, SaveFileDialogProps } from './file-dialog';
@@ -38,7 +38,7 @@ export class DefaultFileDialogService {
 
     @inject(FileSystem) protected readonly fileSystem: FileSystem;
     @inject(OpenFileDialogFactory) protected readonly openFileDialogFactory: OpenFileDialogFactory;
-    @inject(LabelProvider) protected readonly labelProvider: LabelProvider;
+    @inject(FileStatLabelProvider) protected readonly labelProvider: FileStatLabelProvider;
     @inject(SaveFileDialogFactory) protected readonly saveFileDialogFactory: SaveFileDialogFactory;
 
     async showOpenDialog(props: OpenFileDialogProps & { canSelectMany: true }, folder?: FileStat): Promise<MaybeArray<URI> | undefined>;

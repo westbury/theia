@@ -15,15 +15,15 @@
  ********************************************************************************/
 
 import { injectable, inject } from 'inversify';
-import { LabelProviderContribution, LabelProvider } from '@theia/core/lib/browser/label-provider';
+import { LabelProviderContribution, UriLabelProvider } from '@theia/core/lib/browser';
 import URI from '@theia/core/lib/common/uri';
 import { GIT_RESOURCE_SCHEME } from './git-resource';
 import { MaybePromise } from '@theia/core';
 
 @injectable()
-export class GitUriLabelProviderContribution implements LabelProviderContribution {
+export class GitUriLabelProviderContribution implements LabelProviderContribution<URI> {
 
-    constructor( @inject(LabelProvider) protected labelProvider: LabelProvider) {
+    constructor(@inject(UriLabelProvider) protected labelProvider: UriLabelProvider) {
     }
 
     canHandle(element: object): number {

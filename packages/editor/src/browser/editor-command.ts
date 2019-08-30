@@ -17,7 +17,7 @@
 import { inject, injectable } from 'inversify';
 import { CommandContribution, CommandRegistry, Command } from '@theia/core/lib/common';
 import URI from '@theia/core/lib/common/uri';
-import { CommonCommands, PreferenceService, QuickPickItem, QuickPickService, LabelProvider, QuickPickValue } from '@theia/core/lib/browser';
+import { CommonCommands, PreferenceService, QuickPickItem, QuickPickService, UriLabelProvider, QuickPickValue } from '@theia/core/lib/browser';
 import { Languages, Language } from '@theia/languages/lib/browser';
 import { EditorManager } from './editor-manager';
 import { EncodingMode } from './editor';
@@ -135,8 +135,8 @@ export class EditorCommandContribution implements CommandContribution {
 
     @inject(MessageService) protected readonly messageService: MessageService;
 
-    @inject(LabelProvider)
-    protected readonly labelProvider: LabelProvider;
+    @inject(UriLabelProvider)
+    protected readonly labelProvider: UriLabelProvider;
 
     @inject(Languages)
     protected readonly languages: Languages;
