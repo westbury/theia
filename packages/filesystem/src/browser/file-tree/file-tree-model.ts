@@ -47,7 +47,7 @@ export class FileTreeModel extends TreeModelImpl implements LocationService {
 
     set location(uri: URI | undefined) {
         if (uri) {
-            this.fileSystem.getFileStat(uri.toString()).then(async fileStat => {
+            this.watcher.getFileStat(uri.toString()).then(async fileStat => {
                 if (fileStat) {
                     const label = this.labelProvider.getName(uri);
                     const icon = await this.labelProvider.getIcon(fileStat);
