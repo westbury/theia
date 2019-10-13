@@ -16,6 +16,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { interfaces } from 'inversify';
 import { Disposable, Event } from '@theia/core/lib/common';
 import URI from '@theia/core/lib/common/uri';
 
@@ -33,6 +34,7 @@ export interface ScmProvider extends Disposable {
     readonly onDidChangeStatusBarCommands?: Event<ScmCommand[] | undefined>;
 
     readonly amendSupport?: ScmAmendSupport;
+    readonly get?: <T>(id: interfaces.ServiceIdentifier<T>) => T | undefined;
 }
 
 export interface ScmResourceGroup extends Disposable {
@@ -69,11 +71,11 @@ export interface ScmCommand {
 }
 
 export interface ScmCommit {
-    id: string,  // eg Git sha or Mercurial revision number
-    summary: string,
-    authorName: string,
-    authorEmail: string,
-    authorDateRelative: string
+    readonly id: string;  // eg Git sha or Mercurial revision number
+    readonly summary: string;
+    readonly authorName: string;
+    readonly authorEmail: string;
+    readonly authorDateRelative: string;
 }
 
 export interface ScmAmendSupport {

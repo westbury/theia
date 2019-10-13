@@ -35,6 +35,7 @@ import { ScmService } from '@theia/scm/lib/browser/scm-service';
 import { ScmContextKeyService } from '@theia/scm/lib/browser/scm-context-key-service';
 import { ContextKeyService } from '@theia/core/lib/browser/context-key-service';
 import { GitScmProvider } from './git-scm-provider';
+import { createGitScmProviderFactory } from './git-frontend-module';
 import { EditorManager } from '@theia/editor/lib/browser';
 import { GitErrorHandler } from './git-error-handler';
 import { GitPreferences } from './git-preferences';
@@ -99,7 +100,7 @@ describe('GitRepositoryProvider', () => {
         testContainer.bind(FileSystemWatcher).toConstantValue(mockFileSystemWatcher);
         testContainer.bind(StorageService).toConstantValue(mockStorageService);
         testContainer.bind(ScmService).toSelf().inSingletonScope();
-        testContainer.bind(GitScmProvider.Factory).toFactory(GitScmProvider.createFactory);
+        testContainer.bind(GitScmProvider.Factory).toFactory(createGitScmProviderFactory);
         testContainer.bind(ScmContextKeyService).toSelf().inSingletonScope();
         testContainer.bind(ContextKeyService).toSelf().inSingletonScope();
         testContainer.bind(GitCommitMessageValidator).toSelf().inSingletonScope();
