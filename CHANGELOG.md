@@ -64,6 +64,9 @@ Breaking changes:
   Before these attributes have to be computed for all nodes and stored as a part of the layout.
   From now on they will be computed only on demand for visible nodes.
   It decreases requirements to the local storage and allows to invalidate node appearance by simply rerendering a tree.
+- [scm][git] the History view (GitHistoryWidget) has moved from the git package to a new   package, scm-extra, and
+  renamed to ScmHistoryWidget.  GitNavigableListWidget has also moved.
+  CSS classes have been moved renamed accordingly.  [6381](https://github.com/eclipse-theia/theia/pull/6381)
 
 ## v0.14.0
 

@@ -215,6 +215,7 @@
     padding-bottom: 2px;
     font-size: var(--theia-ui-font-size0);
 }
+
 .scm-change-count {
     float: right;
 }

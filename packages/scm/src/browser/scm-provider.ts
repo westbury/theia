@@ -69,11 +69,23 @@ export interface ScmCommand {
 }
 
 export interface ScmCommit {
-    id: string,  // eg Git sha or Mercurial revision number
-    summary: string,
-    authorName: string,
-    authorEmail: string,
-    authorDateRelative: string
+    readonly id: string;  // eg Git sha or Mercurial revision number
+    readonly commitDetailUri: URI;
+    readonly summary: string;
+    readonly authorName: string;
+    readonly authorEmail: string;
+    readonly authorDateRelative: string;
+    readonly fileChanges: ScmFileChange[];
+    readonly commitDetailOptions: {};
+}
+
+export interface ScmFileChange {
+    readonly uri: string;
+    getCaption(): string;
+    getStatusCaption(): string;
+    getStatusAbbreviation(): string;
+    getClassNameForStatus(): string;
+    getUriToOpen(): URI;
 }
 
 export interface ScmAmendSupport {
