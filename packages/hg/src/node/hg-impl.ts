@@ -24,14 +24,14 @@ import {
 import { HgRepositoryManager } from './hg-repository-manager';
 import { HgLocator } from './hg-locator/hg-locator-protocol';
 import { HgInit } from './init/hg-init';
-import * as hg from './hg';
-import { HGRepo, getHgRepo } from './hg';
+import { HGRepo } from './hg';
 import { FileSystem } from '@theia/filesystem/lib/common';
 import * as fs from 'fs-extra';
 import { Path as TheiaPath } from '@theia/core';
 import { relative } from 'path';
 import { HgPromptServerImpl } from './hg-prompt';
 import { HgPrompt } from '../common/hg-prompt';
+import { HgCommandServer } from './hg//hg-command-server';
 
 /**
  * Hg implementation.
@@ -58,6 +58,8 @@ export class HgImpl implements Hg {
     @inject(HgPromptServerImpl)
     protected readonly promptServer: HgPromptServerImpl;
 
+    protected commandServers: Map<string, HGRepo> = new Map();
+
     dispose(): void {
         this.locator.dispose();
         this.hgInit.dispose();
@@ -65,10 +67,96 @@ export class HgImpl implements Hg {
 
     async clone(remoteUrl: string, options: Hg.Options.Clone): Promise<Repository> {
         const localPath = FileUri.fsPath(options.localUri);
-        await hg.clone(this.hgInit, remoteUrl, localPath, []);
+        await this.doClone(remoteUrl, localPath, []);
         const repository = { localUri: options.localUri };
         await this.addHgExtensions(repository);
         return repository;
+    }
+
+    /**
+     * Clone a repository.
+     * @param fromUrl Mercurial URL to clone from (can be an HTTPS URL, a file:// URL, a file path, etc.)
+     * @param toPath File system path to clone to
+     * @param opts Optional extra command line options
+     * @param progressCallback Optionally receive progress updates
+     */
+    async doClone(
+        fromUrl: string,
+        toPath: string,
+        opts: string[] = [],
+        progressCallback?: (progress: number) => void
+    ): Promise<HGRepo> {
+        if (fromUrl.startsWith('file://')) {
+            // Theia's file URI is not compatible with Mercurial's: hg does not like the encoded ':' ('%3A') before the Windows drive letter
+            fromUrl = FileUri.fsPath(fromUrl);
+        }
+
+        const server = new HgCommandServer();
+        const workingDirectoryPath = process.cwd();
+        const args = ['clone', fromUrl, toPath, ...opts];
+        const outputLineCallback = (line: string) => {
+            if (progressCallback) {
+                this.processCloneOutput(progressCallback, line);
+            }
+        };
+        await server.start(path => this.hgInit.startCommandServer(path), workingDirectoryPath);
+        const result = await server.runCommand(args, outputLineCallback);
+        server.stop();
+
+        if (result.resultCode === 0) {
+            return new HGRepo(path => this.hgInit.startCommandServer(path), toPath);
+        } else {
+            throw new Error(`Result code from Hg command line: ${result.resultCode}`);
+        }
+    }
+
+    protected processCloneOutput(progressCallback: (progress: number) => void, line: string): void {
+        const trimmed = line.trim();
+
+        if (trimmed === 'requesting all changes') {
+            progressCallback(0.1);
+        } else if (trimmed === 'adding changesets') {
+            progressCallback(0.5);
+        } else if (trimmed === 'adding manifests') {
+            progressCallback(0.9);
+        }
+    }
+
+    /**
+     * This implementation leaves all command servers running for ten seconds.  The reason for a short period
+     * is that users cannot delete Mercurial repositories if a command server has the repository locked.
+     *
+     * @param hgInit
+     * @param localUri
+     */
+    async lookupHgRepo(localUri: string): Promise<HGRepo> {
+        const repo = this.commandServers.get(localUri);
+        if (repo) {
+            this.delayedClose(localUri, repo);
+            return repo;
+        }
+
+        const newRepo = new HGRepo(path => this.hgInit.startCommandServer(path), FileUri.fsPath(localUri));
+        await newRepo.start();
+        this.commandServers.set(localUri, newRepo);
+        this.delayedClose(localUri, newRepo);
+        return newRepo;
+    }
+
+    /**
+     * Shuts down the command server 10 seconds after the last operation started.
+     */
+    protected async delayedClose(localUri: string, repo: HGRepo) {
+        repo.latestCommandCounter++;
+        const thisCommandCounter = repo.latestCommandCounter;
+        setTimeout(() => {
+            if (thisCommandCounter === repo.latestCommandCounter) {
+                // Note that a new command may arrive before the command server shutdown
+                // has completed.  We can only assume that Mercurial handles this correctly.
+                this.commandServers.delete(localUri);
+                repo.dispose();
+            }
+        }, 10000);
     }
 
     private async addHgExtensions(repository: Repository): Promise<void> {
@@ -208,7 +296,7 @@ export class HgImpl implements Hg {
     }
 
     protected async getHgRepo(repository: Repository): Promise<HGRepo> {
-        return getHgRepo(this.hgInit, repository.localUri);
+        return this.lookupHgRepo(repository.localUri);
     }
 
     async forget(repository: Repository, uris: string[]): Promise<void> {
