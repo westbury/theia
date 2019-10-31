@@ -29,6 +29,7 @@ import { ScmAvatarService } from '../scm-avatar-service';
 import { ScmNavigableListWidget } from '../scm-navigable-list-widget';
 import * as React from 'react';
 import { AlertMessage } from '@theia/core/lib/browser/widgets/alert-message';
+const { Gitgraph } = require('@gitgraph/react');
 
 export const ScmHistorySupport = Symbol('scm-history-support');
 export interface ScmHistorySupport {
@@ -322,12 +323,35 @@ export class ScmHistoryWidget extends ScmNavigableListWidget<ScmHistoryListNode>
         this.update();
     }
 
+    // tslint:disable:no-any
     protected render(): React.ReactNode {
         let content: React.ReactNode;
         switch (this.status.state) {
             case 'ready':
                 content = < React.Fragment >
                     {this.renderHistoryHeader()}
+                    <Gitgraph>
+                        {(gitgraph: any) => {
+                            // Simulate git commands with Gitgraph API.
+                            const master = gitgraph.branch('master');
+                            master.commit('Initial commit');
+
+                            const develop = gitgraph.branch('develop');
+                            develop.commit('Add TypeScript');
+
+                            const aFeature = gitgraph.branch('a-feature');
+                            aFeature
+                                .commit('Make it work')
+                                .commit('Make it right')
+                                .commit('Make it fast');
+
+                            develop.merge(aFeature);
+                            develop.commit('Prepare v1');
+
+                            master.merge(develop).tag('v1.0.0');
+                        }}
+                    </Gitgraph>
+
                     {this.renderCommitList()}
                 </React.Fragment>;
                 break;
