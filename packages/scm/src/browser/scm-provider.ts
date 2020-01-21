@@ -16,8 +16,14 @@
 
 // tslint:disable:no-any
 
+import { interfaces } from 'inversify';
 import { Disposable, Event } from '@theia/core/lib/common';
 import URI from '@theia/core/lib/common/uri';
+
+export const ScmFactory = Symbol('ScmFactory');
+export interface ScmFactory {
+    get<T>(id: interfaces.ServiceIdentifier<T>): T | undefined;
+}
 
 export interface ScmProvider extends Disposable {
     readonly id: string;
@@ -33,6 +39,7 @@ export interface ScmProvider extends Disposable {
     readonly onDidChangeStatusBarCommands?: Event<ScmCommand[] | undefined>;
 
     readonly amendSupport?: ScmAmendSupport;
+    readonly get?: <T>(id: interfaces.ServiceIdentifier<T>) => T | undefined;
 }
 
 export interface ScmResourceGroup extends Disposable {

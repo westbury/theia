@@ -167,8 +167,7 @@ export class GitRepositoryProvider {
     }
 
     protected registerScmProvider(repository: Repository): void {
-        const providerContainer = this.scmProviderFactory({ repository });
-        const provider = providerContainer.get(GitScmProvider);
+        const provider = this.scmProviderFactory({ repository });
         this.scmService.registerScmProvider(provider, {
             input: {
                 placeholder: 'Message (press {0} to commit)',
@@ -179,7 +178,6 @@ export class GitRepositoryProvider {
                         type: issue.status
                     };
                 },
-                providerContainer
             }
         });
     }

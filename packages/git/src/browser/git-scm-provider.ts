@@ -28,7 +28,7 @@ import { Repository, Git, CommitWithChanges, GitFileChange, WorkingDirectoryStat
 import { GIT_RESOURCE_SCHEME } from './git-resource';
 import { GitErrorHandler } from './git-error-handler';
 import { EditorWidget } from '@theia/editor/lib/browser';
-import { ScmProvider, ScmCommand, ScmResourceGroup, ScmAmendSupport, ScmCommit, ScmFileChange } from '@theia/scm/lib/browser/scm-provider';
+import { ScmFactory, ScmProvider, ScmCommand, ScmResourceGroup, ScmAmendSupport, ScmCommit, ScmFileChange } from '@theia/scm/lib/browser/scm-provider';
 import { GitCommitDetailWidgetOptions } from './history/git-commit-detail-widget';
 import { LabelProvider } from '@theia/core/lib/browser/label-provider';
 
@@ -72,6 +72,9 @@ export class GitScmProvider implements ScmProvider {
     @inject(GitScmProviderOptions)
     protected readonly options: GitScmProviderOptions;
 
+    @inject(ScmFactory)
+    protected readonly scmFactory: ScmFactory;
+
     @inject(LabelProvider)
     protected readonly labelProvider: LabelProvider;
 
@@ -97,6 +100,10 @@ export class GitScmProvider implements ScmProvider {
     protected _amendSupport: GitAmendSupport;
     get amendSupport(): GitAmendSupport {
         return this._amendSupport;
+    }
+
+    get<T>(id: interfaces.ServiceIdentifier<T>): T | undefined {
+        return this.scmFactory.get(id);
     }
 
     get acceptInputCommand(): ScmCommand | undefined {
@@ -416,13 +423,20 @@ export namespace GitScmProvider {
             groups: []
         };
     }
-    export type ContainerFactory = (options: GitScmProviderOptions) => interfaces.Container;
+    export type ContainerFactory = (options: GitScmProviderOptions) => GitScmProvider;
     export function createFactory(ctx: interfaces.Context): ContainerFactory {
         const typeContainer = ctx.container.get(GitScmProvider.ScmTypeContainer as interfaces.ServiceIdentifier<interfaces.Container>);
         return (options: GitScmProviderOptions) => {
             const container = typeContainer.createChild();
             container.bind(GitScmProviderOptions).toConstantValue(options);
-            return container;
+            const scmFactory: ScmFactory = {
+                get<T>(id: interfaces.ServiceIdentifier<T>): T | undefined {
+                    return container.get(id);
+                }
+            };
+            container.bind(ScmFactory).toConstantValue(scmFactory);
+            container.bind(GitScmProvider).toSelf().inSingletonScope();
+            return container.get(GitScmProvider);
         };
     }
     export const ScmTypeContainer = Symbol('GitScmProvider.TypeContainer');

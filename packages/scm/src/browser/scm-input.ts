@@ -19,7 +19,6 @@
 import * as debounce from 'p-debounce';
 import { Disposable, DisposableCollection, Emitter } from '@theia/core/lib/common';
 import { JSONExt, JSONObject } from '@phosphor/coreutils/lib/json';
-import { interfaces } from 'inversify';
 
 export interface ScmInputIssue {
     message: string;
@@ -31,9 +30,8 @@ export interface ScmInputValidator {
 }
 
 export interface ScmInputOptions {
-    placeholder?: string
-    validator?: ScmInputValidator
-    providerContainer?: interfaces.Container
+    placeholder?: string;
+    validator?: ScmInputValidator;
 }
 
 export interface ScmInputData {
@@ -128,11 +126,5 @@ export class ScmInput implements Disposable {
             this._issue = data.issue;
             this.fireDidChange();
         }
-    }
-
-    get<T>(serviceIdentifier: interfaces.ServiceIdentifier<T>): T | undefined {
-        return this.options.providerContainer
-            ? this.options.providerContainer.get(serviceIdentifier)
-            : undefined;
     }
 }

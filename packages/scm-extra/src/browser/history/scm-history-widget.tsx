@@ -124,7 +124,7 @@ export class ScmHistoryWidget extends ScmNavigableListWidget<ScmHistoryListNode>
 
         const repository = this.scmService.selectedRepository;
         if (repository) {
-            this.historySupport = repository.input.get<ScmHistorySupport>(ScmHistorySupport);
+            this.historySupport = repository.provider.get && repository.provider.get(ScmHistorySupport);
             this.setContent(this.options);
             if (this.historySupport) {
                 this.toDisposeOnRepositoryChange.push(this.historySupport.onDidChangeHistory(() => this.setContent(this.options)));
