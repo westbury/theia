@@ -45,6 +45,8 @@ import { GitScmProvider } from './git-scm-provider';
 import { ColorContribution } from '@theia/core/lib/browser/color-application-contribution';
 import { GitHistorySupport } from './history/git-history-support';
 import { ScmHistorySupport } from '@theia/scm-extra/lib/browser/history/scm-history-widget';
+import { ScmFactoryForPlugin } from '@theia/scm/lib/browser/scm-provider';
+import { GitFactoryForPlugin } from './git-factory-for-plugin';
 
 export default new ContainerModule(bind => {
     bindGitPreferences(bind);
@@ -86,4 +88,8 @@ export default new ContainerModule(bind => {
 
     bind(GitSyncService).toSelf().inSingletonScope();
     bind(GitErrorHandler).toSelf().inSingletonScope();
+
+    bind(GitFactoryForPlugin).toSelf().inSingletonScope();
+    bind(ScmFactoryForPlugin).toService(GitFactoryForPlugin);
+
 });

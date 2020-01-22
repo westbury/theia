@@ -25,6 +25,12 @@ export interface ScmFactory {
     get<T>(id: interfaces.ServiceIdentifier<T>): T | undefined;
 }
 
+export const ScmFactoryForPlugin = Symbol('ScmFactoryForPlugin');
+export interface ScmFactoryForPlugin {
+    readonly pluginId: string;
+    get<T>(id: interfaces.ServiceIdentifier<T>, rootUri: string): T | undefined;
+}
+
 export interface ScmProvider extends Disposable {
     readonly id: string;
     readonly label: string;
@@ -95,6 +101,7 @@ export interface ScmFileChange {
     getUriToOpen(): URI;
 }
 
+export const ScmAmendSupport = Symbol('ScmAmendSupport');
 export interface ScmAmendSupport {
     getInitialAmendingCommits(amendingHeadCommitId: string, latestCommitId: string | undefined): Promise<ScmCommit[]>
     getMessage(commit: string): Promise<string>;

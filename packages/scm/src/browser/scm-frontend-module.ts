@@ -23,8 +23,10 @@ import {
     WidgetFactory, ViewContainer,
     WidgetManager, ApplicationShellLayoutMigration
 } from '@theia/core/lib/browser';
+import { bindContributionProvider } from '@theia/core/lib/common';
 import { ScmService } from './scm-service';
 import { SCM_WIDGET_FACTORY_ID, ScmContribution, SCM_VIEW_CONTAINER_ID, SCM_VIEW_CONTAINER_TITLE_OPTIONS } from './scm-contribution';
+import { ScmFactoryForPlugin } from './scm-provider';
 import { ScmWidget } from './scm-widget';
 import { ScmQuickOpenService } from './scm-quick-open-service';
 import { bindDirtyDiff } from './dirty-diff/dirty-diff-module';
@@ -74,4 +76,6 @@ export default new ContainerModule(bind => {
     bind(ScmAvatarService).toSelf().inSingletonScope();
 
     bindDirtyDiff(bind);
+
+    bindContributionProvider(bind, ScmFactoryForPlugin);
 });

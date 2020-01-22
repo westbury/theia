@@ -326,6 +326,20 @@ export class PluginScmProvider implements ScmProvider {
         }
     }
 
+    // public amendSupport: ScmAmendSupport = {
+    //     getInitialAmendingCommits: async (amendingHeadCommitId: string, latestCommitId: string | undefined) => {
+    //         this.
+    //         return new ScmCommit[];
+    //     }
+
+    //     getMessage: (commit: string) => Promise < string > {
+
+    //     }
+
+    //     reset: (commit: string): Promise<void>;
+    //     getLastCommit: () => Promise<ScmCommit | undefined>;
+
+    // };
 }
 
 export class PluginScmResourceGroup implements ScmResourceGroup {

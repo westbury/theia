@@ -16,11 +16,11 @@
 
 // tslint:disable:no-any
 
-import { DisposableCollection, Emitter } from '@theia/core/lib/common';
-import { injectable, inject } from 'inversify';
+import { injectable, inject, named } from 'inversify';
+import { DisposableCollection, Emitter, ContributionProvider } from '@theia/core/lib/common';
 import { ScmContextKeyService } from './scm-context-key-service';
 import { ScmRepository, ScmProviderOptions } from './scm-repository';
-import { ScmCommand, ScmProvider } from './scm-provider';
+import { ScmCommand, ScmProvider, ScmAmendSupport, ScmFactoryForPlugin } from './scm-provider';
 import URI from '@theia/core/lib/common/uri';
 
 @injectable()
@@ -28,6 +28,9 @@ export class ScmService {
 
     @inject(ScmContextKeyService)
     protected readonly contextKeys: ScmContextKeyService;
+
+    @inject(ContributionProvider) @named(ScmFactoryForPlugin)
+    protected readonly scmFactories: ContributionProvider<ScmFactoryForPlugin>;
 
     protected readonly _repositories = new Map<string, ScmRepository>();
     protected _selectedRepository: ScmRepository | undefined;
@@ -68,6 +71,7 @@ export class ScmService {
         this._selectedRepository = repository;
         this.updateContextKeys();
         if (this._selectedRepository) {
+            this.ensureAmendSupportBound(this._selectedRepository.provider);
             this.toDisposeOnSelected.push(this._selectedRepository.onDidChange(() => this.updateContextKeys()));
             if (this._selectedRepository.provider.onDidChangeStatusBarCommands) {
                 this.toDisposeOnSelected.push(this._selectedRepository.provider.onDidChangeStatusBarCommands(() => this.fireDidChangeStatusBarCommands()));
@@ -75,6 +79,13 @@ export class ScmService {
         }
         this.onDidChangeSelectedRepositoryEmitter.fire(this._selectedRepository);
         this.fireDidChangeStatusBarCommands();
+    }
+
+    protected ensureAmendSupportBound(provider: ScmProvider): void {
+        const scmFactory = this.scmFactories.getContributions().find(factory => factory.pluginId === provider.id);
+        if (scmFactory) {
+            (provider as any).amendSupport = scmFactory.get<ScmAmendSupport>(ScmAmendSupport, provider.rootUri);
+        }
     }
 
     findRepository(uri: URI): ScmRepository | undefined {
