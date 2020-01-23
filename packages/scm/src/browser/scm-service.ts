@@ -82,9 +82,14 @@ export class ScmService {
     }
 
     protected ensureAmendSupportBound(provider: ScmProvider): void {
-        const scmFactory = this.scmFactories.getContributions().find(factory => factory.pluginId === provider.id);
-        if (scmFactory) {
-            (provider as any).amendSupport = scmFactory.get<ScmAmendSupport>(ScmAmendSupport, provider.rootUri);
+        if (!('amendSupport' in provider)) {
+            const scmFactory = this.scmFactories.getContributions().find(factory => factory.pluginId === provider.id);
+            if (scmFactory) {
+                const amendSupport = scmFactory.get<ScmAmendSupport>(ScmAmendSupport, provider.rootUri);
+                if (amendSupport) {
+                    (provider as any).amendSupport = amendSupport;
+                }
+            }
         }
     }
 
