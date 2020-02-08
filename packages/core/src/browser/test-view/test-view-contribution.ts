@@ -20,7 +20,7 @@ import {
     KeybindingRegistry,
     ViewContainerTitleOptions
 } from '..';
-import { CommandRegistry, CommandService } from '../../common';
+import { CommandRegistry, CommandService, MenuPath } from '../../common';
 import { ContextKeyService, ContextKey } from '../context-key-service';
 import { TestWidget } from './test-widget';
 import { ColorContribution } from '../color-application-contribution';
@@ -33,6 +33,9 @@ export const TEST_VIEW_CONTAINER_TITLE_OPTIONS: ViewContainerTitleOptions = {
     iconClass: 'theia-plugin-test-tab-icon',
     closeable: true
 };
+
+export const TEST_CONTEXT_MENU: MenuPath = ['test-context-menu'];
+
 
 // export namespace SCM_COMMANDS {
 //     export const CHANGE_REPOSITORY = {
@@ -58,13 +61,13 @@ export class TestContribution extends AbstractViewContribution<TestWidget> imple
         super({
             viewContainerId: TEST_VIEW_CONTAINER_ID,
             widgetId: TEST_WIDGET_FACTORY_ID,
-            widgetName: 'Source Control',
+            widgetName: 'Test Cases',
             defaultWidgetOptions: {
                 area: 'left',
                 rank: 300
             },
-            toggleCommandId: 'scmView:toggle',
-            toggleKeybinding: 'ctrlcmd+shift+g'
+            toggleCommandId: 'testView:toggle',
+            toggleKeybinding: 'ctrlcmd+shift+e'
         });
     }
 

@@ -18,15 +18,15 @@ import { injectable, inject, postConstruct } from 'inversify';
 import { Message } from '@phosphor/messaging';
 import URI from '../../common/uri';
 import { CommandService, SelectionService } from '../../common';
-import { CommonCommands, CorePreferences, ViewContainerTitleOptions, Key } from '..';
-import { ContextMenuRenderer, TreeProps, TreeModel, TreeNode } from '..';
-import { FileTreeWidget, FileNode } from '@theia/filesystem/lib/browser';
-import { WorkspaceService, WorkspaceCommands } from '@theia/workspace/lib/browser';
+import { CorePreferences, ViewContainerTitleOptions, Key } from '..';
+import { ContextMenuRenderer, TreeWidget, TreeProps, TreeModel, TreeModelImpl, TreeNode } from '..';
+// import { FileTreeWidget, FileNode } from '@theia/filesystem/lib/browser';
+// import { WorkspaceService, WorkspaceCommands } from '@theia/workspace/lib/browser';
 import { ApplicationShell } from '../shell/application-shell';
 // import { WorkspaceNode, WorkspaceRootNode } from './navigator-tree';
-import { FileNavigatorModel } from '@theia/navigator/lib/browser//navigator-model';  // FIXME
-import { FileSystem } from '@theia/filesystem/lib/common/filesystem';
-import { isOSX, environment } from '../../..';
+// import { FileNavigatorModel } from '@theia/navigator/lib/browser//navigator-model';  // FIXME
+// import { FileSystem } from '@theia/filesystem/lib/common/filesystem';
+// import { isOSX, environment } from '../..';
 import * as React from 'react';
 // import { NavigatorContextKeyService } from './navigator-context-key-service';
 
@@ -42,7 +42,7 @@ export const LABEL = 'No folder opened';
 export const CLASS = 'theia-Files';
 
 @injectable()
-export class TestWidget extends FileTreeWidget {
+export class TestWidget extends TreeWidget {
 
     static ID = 'test-view';
 
@@ -50,13 +50,11 @@ export class TestWidget extends FileTreeWidget {
 
     constructor(
         @inject(TreeProps) readonly props: TreeProps,
-        @inject(FileNavigatorModel) readonly model: FileNavigatorModel,
+        @inject(TreeModelImpl) readonly model: TreeModel,
         @inject(ContextMenuRenderer) contextMenuRenderer: ContextMenuRenderer,
         @inject(CommandService) protected readonly commandService: CommandService,
         @inject(SelectionService) protected readonly selectionService: SelectionService,
-        @inject(WorkspaceService) protected readonly workspaceService: WorkspaceService,
         @inject(ApplicationShell) protected readonly shell: ApplicationShell,
-        @inject(FileSystem) protected readonly fileSystem: FileSystem
     ) {
         super(props, model, contextMenuRenderer);
         this.addClass(CLASS);
@@ -102,30 +100,24 @@ export class TestWidget extends FileTreeWidget {
     }
 
     protected enableDndOnMainPanel(): void {
-        const mainPanelNode = this.shell.mainPanel.node;
-        this.addEventListener(mainPanelNode, 'drop', async ({ dataTransfer }) => {
-            const treeNodes = dataTransfer && this.getSelectedTreeNodesFromData(dataTransfer) || [];
-            treeNodes.filter(FileNode.is).forEach(treeNode => this.commandService.executeCommand(CommonCommands.OPEN.id, treeNode.uri));
-        });
-        const handler = (e: DragEvent) => {
-            if (e.dataTransfer) {
-                e.dataTransfer.dropEffect = 'link';
-                e.preventDefault();
-            }
-        };
-        this.addEventListener(mainPanelNode, 'dragover', handler);
-        this.addEventListener(mainPanelNode, 'dragenter', handler);
+        // const mainPanelNode = this.shell.mainPanel.node;
+        // this.addEventListener(mainPanelNode, 'drop', async ({ dataTransfer }) => {
+        //     const treeNodes = dataTransfer && this.getSelectedTreeNodesFromData(dataTransfer) || [];
+        //     treeNodes.filter(FileNode.is).forEach(treeNode => this.commandService.executeCommand(CommonCommands.OPEN.id, treeNode.uri));
+        // });
+        // const handler = (e: DragEvent) => {
+        //     if (e.dataTransfer) {
+        //         e.dataTransfer.dropEffect = 'link';
+        //         e.preventDefault();
+        //     }
+        // };
+        // this.addEventListener(mainPanelNode, 'dragover', handler);
+        // this.addEventListener(mainPanelNode, 'dragenter', handler);
     }
 
     protected getContainerTreeNode(): TreeNode | undefined {
         const root = this.model.root;
-        if (this.workspaceService.isMultiRootWorkspaceOpened) {
-            return root;
-        }
-        // if (WorkspaceNode.is(root)) {
-        //     return root.children[0];
-        // }
-        return undefined;
+        return root;
     }
 
     protected deflateForStorage(node: TreeNode): object {
@@ -164,31 +156,24 @@ export class TestWidget extends FileTreeWidget {
         // }
     }
 
-    protected handlePaste(event: ClipboardEvent): void {
-        if (event.clipboardData) {
-            const raw = event.clipboardData.getData('text/plain');
-            if (!raw) {
-                return;
-            }
-            for (const file of raw.split('\n')) {
-                const uri = new URI(file);
-                if (this.model.copy(uri)) {
-                    event.preventDefault();
-                }
-            }
-        }
-    }
-
-    protected canOpenWorkspaceFileAndFolder: boolean = isOSX || !environment.electron.is();
-
-    protected readonly openWorkspace = () => this.doOpenWorkspace();
-    protected doOpenWorkspace(): void {
-        this.commandService.executeCommand(WorkspaceCommands.OPEN_WORKSPACE.id);
+    protected handlePaste(_event: ClipboardEvent): void {
+        // if (event.clipboardData) {
+        //     const raw = event.clipboardData.getData('text/plain');
+        //     if (!raw) {
+        //         return;
+        //     }
+        //     for (const file of raw.split('\n')) {
+        //         const uri = new URI(file);
+        //         if (this.model.copy(uri)) {
+        //             event.preventDefault();
+        //         }
+        //     }
+        // }
     }
 
     protected readonly openFolder = () => this.doOpenFolder();
     protected doOpenFolder(): void {
-        this.commandService.executeCommand(WorkspaceCommands.OPEN_FOLDER.id);
+        // A command example
     }
 
     protected readonly keyUpHandler = (e: React.KeyboardEvent) => {
@@ -201,19 +186,19 @@ export class TestWidget extends FileTreeWidget {
      * button when the workspace root is not yet set.
      */
     protected renderOpenWorkspaceDiv(): React.ReactNode {
-        let openButton;
+        // let openButton;
 
-        if (this.canOpenWorkspaceFileAndFolder) {
-            openButton = <button className='theia-button open-workspace-button' title='Select a folder or a workspace-file to open as your workspace'
-                onClick={this.openWorkspace} onKeyUp={this.keyUpHandler}>
-                Open Workspace
+        // if (this.canOpenWorkspaceFileAndFolder) {
+        //     openButton = <button className='theia-button open-workspace-button' title='Select a folder or a workspace-file to open as your workspace'
+        //         onClick={this.openWorkspace} onKeyUp={this.keyUpHandler}>
+        //         Open Workspace
+        //     </button>;
+        // } else {
+        const openButton = <button className='theia-button open-workspace-button' title='Select a folder as your workspace root' onClick={this.openFolder}
+            onKeyUp={this.keyUpHandler}>
+            Open Folder
             </button>;
-        } else {
-            openButton = <button className='theia-button open-workspace-button' title='Select a folder as your workspace root' onClick={this.openFolder}
-                onKeyUp={this.keyUpHandler}>
-                Open Folder
-            </button>;
-        }
+        // }
 
         return <div className='theia-navigator-container'>
             <div className='center'>You have not yet opened a workspace.</div>
@@ -221,14 +206,6 @@ export class TestWidget extends FileTreeWidget {
                 {openButton}
             </div>
         </div>;
-    }
-
-    protected handleClickEvent(node: TreeNode | undefined, event: React.MouseEvent<HTMLElement>): void {
-        const modifierKeyCombined: boolean = isOSX ? (event.shiftKey || event.metaKey) : (event.shiftKey || event.ctrlKey);
-        if (!modifierKeyCombined && node && this.corePreferences['workbench.list.openMode'] === 'singleClick') {
-            this.model.previewNode(node);
-        }
-        super.handleClickEvent(node, event);
     }
 
     // protected onAfterShow(msg: Message): void {
@@ -244,5 +221,10 @@ export class TestWidget extends FileTreeWidget {
     // protected updateSelectionContextKeys(): void {
     //     this.contextKeyService.explorerResourceIsFolder.set(DirNode.is(this.model.selectedNodes[0]));
     // }
+
+}
+
+@injectable()
+export class TestTreeModel extends TreeModelImpl {
 
 }

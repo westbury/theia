@@ -92,6 +92,7 @@ import { TreeLabelProvider } from './tree/tree-label-provider';
 import { TestWidget } from './test-view/test-widget';
 import { TestContribution, TEST_VIEW_CONTAINER_ID, TEST_WIDGET_FACTORY_ID, TEST_VIEW_CONTAINER_TITLE_OPTIONS } from './test-view/test-view-contribution';
 import { bindViewContribution } from '.';
+import { createFileNavigatorWidget } from './test-view/navigator-container';
 
 export { bindResourceProvider, bindMessageService, bindPreferenceService };
 
@@ -316,7 +317,10 @@ export const frontendApplicationModule = new ContainerModule((bind, unbind, isBo
 
     // test view
 
-    bind(TestWidget).toSelf();
+    bind(TestWidget).toDynamicValue(ctx =>
+        createFileNavigatorWidget(ctx.container)
+    );
+    //  bind(TestWidget).toSelf();
     bind(WidgetFactory).toDynamicValue(({ container }) => ({
         id: TEST_WIDGET_FACTORY_ID,
         createWidget: () => container.get(TestWidget)

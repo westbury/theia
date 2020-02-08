@@ -16,8 +16,7 @@
 
 import '../../src/browser/style/index.css';
 
-import { interfaces } from 'inversify';
-import { ContainerModule } from 'inversify';
+import { interfaces, ContainerModule } from 'inversify';
 import { CommandContribution, MenuContribution, ResourceResolver } from '@theia/core/lib/common';
 import {
     WebSocketConnectionProvider,
@@ -83,7 +82,6 @@ export default new ContainerModule(bind => {
     bind(GitErrorHandler).toSelf().inSingletonScope();
 });
 
-
 export function createGitScmProviderFactory(ctx: interfaces.Context): GitScmProvider.Factory {
     return (options: GitScmProviderOptions) => {
         const container = ctx.container.createChild();
@@ -92,7 +90,7 @@ export function createGitScmProviderFactory(ctx: interfaces.Context): GitScmProv
         container.bind(GitHistorySupport).toSelf().inSingletonScope();
         container.bind(ScmHistorySupport).toService(GitHistorySupport);
         const provider = container.get(GitScmProvider);
-        const historySupport = container.get<GitHistorySupport>(GitHistorySupport);
+        const historySupport = container.get(GitHistorySupport);
         (provider as ScmHistoryProvider).historySupport = historySupport;
         return provider;
     };
