@@ -40,6 +40,7 @@ import { PROBLEMS_WIDGET_ID } from '@theia/markers/lib/browser/problem/problem-w
 import { OUTPUT_WIDGET_KIND } from '@theia/output/lib/browser/output-widget';
 import { DebugConsoleContribution } from '@theia/debug/lib/browser/console/debug-console-contribution';
 import { TERMINAL_WIDGET_FACTORY_ID } from '@theia/terminal/lib/browser/terminal-widget-impl';
+import { TEST_VIEW_CONTAINER_ID } from '@theia/core/lib/browser/test-view/test-view-contribution';
 
 export const PLUGIN_VIEW_FACTORY_ID = 'plugin-view';
 export const PLUGIN_VIEW_CONTAINER_FACTORY_ID = 'plugin-view-container';
@@ -101,6 +102,7 @@ export class PluginViewRegistry implements FrontendApplicationContribution {
         this.trackVisibleWidget(SearchInWorkspaceWidget.ID, { viewletId: 'workbench.view.search', sideArea: true });
         this.trackVisibleWidget(SCM_VIEW_CONTAINER_ID, { viewletId: 'workbench.view.scm' });
         this.trackVisibleWidget(DebugWidget.ID, { viewletId: 'workbench.view.debug' });
+        this.trackVisibleWidget(TEST_VIEW_CONTAINER_ID, { viewletId: 'workbench.view.test' });
         // TODO workbench.view.extensions - Theia does not have a proper extension view yet
 
         // VS Code Panels
