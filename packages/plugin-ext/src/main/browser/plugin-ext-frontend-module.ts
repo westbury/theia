@@ -234,4 +234,24 @@ export default new ContainerModule((bind, unbind, isBound, rebind) => {
     rebind(DebugSessionContributionRegistry).toService(PluginDebugSessionContributionRegistry);
 
     bind(ViewColumnService).toSelf().inSingletonScope();
+
+    const TEST_WIDGET_FACTORY_ID = 'test-view';
+    bind(WidgetFactory).toDynamicValue(({ container }) => ({
+        id: TEST_WIDGET_FACTORY_ID,
+        createWidget: (identifier: TreeViewWidgetIdentifier) => {
+            const child = createTreeContainer(container, {
+                contextMenuPath: VIEW_ITEM_CONTEXT_MENU,
+                globalSelection: true
+            });
+            child.bind(TreeViewWidgetIdentifier).toConstantValue(identifier);
+            child.bind(PluginTree).toSelf();
+            child.rebind(TreeImpl).toService(PluginTree);
+            child.bind(PluginTreeModel).toSelf();
+            child.rebind(TreeModelImpl).toService(PluginTreeModel);
+            child.bind(TreeViewWidget).toSelf();
+            child.rebind(TreeWidget).toService(TreeViewWidget);
+            return child.get(TreeWidget);
+        }
+    })).inSingletonScope();
+
 });

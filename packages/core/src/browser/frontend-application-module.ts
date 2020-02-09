@@ -321,10 +321,12 @@ export const frontendApplicationModule = new ContainerModule((bind, unbind, isBo
         createFileNavigatorWidget(ctx.container)
     );
     //  bind(TestWidget).toSelf();
-    bind(WidgetFactory).toDynamicValue(({ container }) => ({
-        id: TEST_WIDGET_FACTORY_ID,
-        createWidget: () => container.get(TestWidget)
-    })).inSingletonScope();
+
+    // moved to plugin-ext
+    // bind(WidgetFactory).toDynamicValue(({ container }) => ({
+    //     id: TEST_WIDGET_FACTORY_ID,
+    //     createWidget: () => container.get(TestWidget)
+    // })).inSingletonScope();
     bind(WidgetFactory).toDynamicValue(({ container }) => ({
         id: TEST_VIEW_CONTAINER_ID,
         createWidget: async () => {
@@ -333,7 +335,9 @@ export const frontendApplicationModule = new ContainerModule((bind, unbind, isBo
                 progressLocationId: 'scm'
             });
             viewContainer.setTitleOptions(TEST_VIEW_CONTAINER_TITLE_OPTIONS);
-            const widget = await container.get(WidgetManager).getOrCreateWidget(TEST_WIDGET_FACTORY_ID);
+
+            // So this is like a default view?
+            const widget = await container.get(WidgetManager).getOrCreateWidget(TEST_WIDGET_FACTORY_ID, { id: 'test-view' });
             viewContainer.addWidget(widget, {
                 canHide: false,
                 initiallyCollapsed: false
