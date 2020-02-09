@@ -14,7 +14,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import { injectable, inject } from 'inversify';
+import { injectable, inject, postConstruct } from 'inversify';
 import { TreeModelImpl, TreeNode, CompositeTreeNode, SelectableTreeNode } from '../tree';
 import { TreeDecoration, DecoratedTreeNode } from '../tree/tree-decorator';
 import { TestTree } from './test-tree';
@@ -53,6 +53,7 @@ export class TestTreeModel extends TreeModelImpl {
         return this.tree;
     }
 
+    @postConstruct()
     async initializeTxrTestsModel(): Promise<void> {
         const testFileLists: TxrPatternNode[] = [];
         for (const config of ['A', 'B']) {

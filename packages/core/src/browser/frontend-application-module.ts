@@ -90,7 +90,7 @@ import { IconThemeService, NoneIconTheme } from './icon-theme-service';
 import { IconThemeApplicationContribution, IconThemeContribution, DefaultFileIconThemeContribution } from './icon-theme-contribution';
 import { TreeLabelProvider } from './tree/tree-label-provider';
 import { TestWidget } from './test-view/test-widget';
-import { TestContribution, TEST_VIEW_CONTAINER_ID, TEST_WIDGET_FACTORY_ID, TEST_VIEW_CONTAINER_TITLE_OPTIONS } from './test-view/test-view-contribution';
+import { TestContribution, TEST_VIEW_CONTAINER_ID, TEST_VIEW_CONTAINER_TITLE_OPTIONS } from './test-view/test-view-contribution';
 import { bindViewContribution } from '.';
 import { createFileNavigatorWidget } from './test-view/navigator-container';
 
@@ -322,11 +322,11 @@ export const frontendApplicationModule = new ContainerModule((bind, unbind, isBo
     );
     //  bind(TestWidget).toSelf();
 
-    // moved to plugin-ext
-    // bind(WidgetFactory).toDynamicValue(({ container }) => ({
-    //     id: TEST_WIDGET_FACTORY_ID,
-    //     createWidget: () => container.get(TestWidget)
-    // })).inSingletonScope();
+    // moved to plugin-ext, but we need it here too for the inversify view widget
+    bind(WidgetFactory).toDynamicValue(({ container }) => ({
+        id: 'test-view2', // TEST_WIDGET_FACTORY_ID,
+        createWidget: () => container.get(TestWidget)
+    })).inSingletonScope();
     bind(WidgetFactory).toDynamicValue(({ container }) => ({
         id: TEST_VIEW_CONTAINER_ID,
         createWidget: async () => {
@@ -337,7 +337,7 @@ export const frontendApplicationModule = new ContainerModule((bind, unbind, isBo
             viewContainer.setTitleOptions(TEST_VIEW_CONTAINER_TITLE_OPTIONS);
 
             // So this is like a default view?
-            const widget = await container.get(WidgetManager).getOrCreateWidget(TEST_WIDGET_FACTORY_ID, { id: 'test-view' });
+            const widget = await container.get(WidgetManager).getOrCreateWidget('test-view2');
             viewContainer.addWidget(widget, {
                 canHide: false,
                 initiallyCollapsed: false
