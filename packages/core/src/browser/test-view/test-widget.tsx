@@ -19,7 +19,8 @@ import { Message } from '@phosphor/messaging';
 import URI from '../../common/uri';
 import { CommandService, SelectionService } from '../../common';
 import { CorePreferences, ViewContainerTitleOptions, Key } from '..';
-import { ContextMenuRenderer, TreeWidget, TreeProps, TreeModel, TreeModelImpl, TreeNode } from '..';
+import { ContextMenuRenderer, TreeWidget, TreeProps, TreeModel, TreeNode } from '..';
+import { TestTreeModel } from './test-tree-model';
 // import { FileTreeWidget, FileNode } from '@theia/filesystem/lib/browser';
 // import { WorkspaceService, WorkspaceCommands } from '@theia/workspace/lib/browser';
 import { ApplicationShell } from '../shell/application-shell';
@@ -50,7 +51,7 @@ export class TestWidget extends TreeWidget {
 
     constructor(
         @inject(TreeProps) readonly props: TreeProps,
-        @inject(TreeModelImpl) readonly model: TreeModel,
+        @inject(TestTreeModel) readonly model: TestTreeModel,
         @inject(ContextMenuRenderer) contextMenuRenderer: ContextMenuRenderer,
         @inject(CommandService) protected readonly commandService: CommandService,
         @inject(SelectionService) protected readonly selectionService: SelectionService,
@@ -221,10 +222,5 @@ export class TestWidget extends TreeWidget {
     // protected updateSelectionContextKeys(): void {
     //     this.contextKeyService.explorerResourceIsFolder.set(DirNode.is(this.model.selectedNodes[0]));
     // }
-
-}
-
-@injectable()
-export class TestTreeModel extends TreeModelImpl {
 
 }

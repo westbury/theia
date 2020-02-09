@@ -25,6 +25,7 @@ import { PluginSharedStyle } from '../plugin-shared-style';
 import { DebugWidget } from '@theia/debug/lib/browser/view/debug-widget';
 import { PluginViewWidget, PluginViewWidgetIdentifier } from './plugin-view-widget';
 import { SCM_VIEW_CONTAINER_ID, ScmContribution } from '@theia/scm/lib/browser/scm-contribution';
+import { TEST_VIEW_CONTAINER_ID, TestContribution } from '@theia/core/lib/browser/test-view/test-view-contribution';
 import { EXPLORER_VIEW_CONTAINER_ID } from '@theia/navigator/lib/browser';
 import { FileNavigatorContribution } from '@theia/navigator/lib/browser/navigator-contribution';
 import { DebugFrontendApplicationContribution } from '@theia/debug/lib/browser/debug-frontend-application-contribution';
@@ -40,7 +41,6 @@ import { PROBLEMS_WIDGET_ID } from '@theia/markers/lib/browser/problem/problem-w
 import { OUTPUT_WIDGET_KIND } from '@theia/output/lib/browser/output-widget';
 import { DebugConsoleContribution } from '@theia/debug/lib/browser/console/debug-console-contribution';
 import { TERMINAL_WIDGET_FACTORY_ID } from '@theia/terminal/lib/browser/terminal-widget-impl';
-import { TEST_VIEW_CONTAINER_ID } from '@theia/core/lib/browser/test-view/test-view-contribution';
 
 export const PLUGIN_VIEW_FACTORY_ID = 'plugin-view';
 export const PLUGIN_VIEW_CONTAINER_FACTORY_ID = 'plugin-view-container';
@@ -62,6 +62,9 @@ export class PluginViewRegistry implements FrontendApplicationContribution {
 
     @inject(ScmContribution)
     protected readonly scm: ScmContribution;
+
+    @inject(TestContribution)
+    protected readonly test: TestContribution;
 
     @inject(FileNavigatorContribution)
     protected readonly explorer: FileNavigatorContribution;
@@ -122,6 +125,9 @@ export class PluginViewRegistry implements FrontendApplicationContribution {
             }
             if (factoryId === SCM_VIEW_CONTAINER_ID && widget instanceof ViewContainerWidget) {
                 this.prepareViewContainer('scm', widget);
+            }
+            if (factoryId === TEST_VIEW_CONTAINER_ID && widget instanceof ViewContainerWidget) {
+                this.prepareViewContainer('test', widget);
             }
             if (factoryId === DebugWidget.ID && widget instanceof DebugWidget) {
                 const viewContainer = widget['sessionWidget']['viewContainer'];
@@ -328,6 +334,13 @@ export class PluginViewRegistry implements FrontendApplicationContribution {
             }
             return undefined;
         }
+        if (containerId === 'test') {
+            const widget = await this.test.openView();
+            if (widget.parent instanceof ViewContainerWidget) {
+                return widget.parent;
+            }
+            return undefined;
+        }
         if (containerId === 'debug') {
             const widget = await this.debug.openView();
             return widget['sessionWidget']['viewContainer'];
@@ -390,6 +403,9 @@ export class PluginViewRegistry implements FrontendApplicationContribution {
         if (viewContainerId === 'scm') {
             return this.widgetManager.getWidget<ViewContainerWidget>(SCM_VIEW_CONTAINER_ID);
         }
+        if (viewContainerId === 'test') {
+            return this.widgetManager.getWidget<ViewContainerWidget>(TEST_VIEW_CONTAINER_ID);
+        }
         if (viewContainerId === 'debug') {
             const debug = await this.widgetManager.getWidget(DebugWidget.ID);
             if (debug instanceof DebugWidget) {
@@ -426,6 +442,12 @@ export class PluginViewRegistry implements FrontendApplicationContribution {
             const scm = await this.widgetManager.getWidget(SCM_VIEW_CONTAINER_ID);
             if (scm instanceof ViewContainerWidget) {
                 await this.prepareViewContainer('scm', scm);
+            }
+        })().catch(console.error));
+        promises.push((async () => {
+            const test = await this.widgetManager.getWidget(TEST_VIEW_CONTAINER_ID);
+            if (test instanceof ViewContainerWidget) {
+                await this.prepareViewContainer('test', test);
             }
         })().catch(console.error));
         promises.push((async () => {

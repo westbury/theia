@@ -15,8 +15,8 @@
  ********************************************************************************/
 
 import { injectable } from 'inversify';
-import { TreeImpl, TreeNode, CompositeTreeNode, SelectableTreeNode, ExpandableTreeNode } from '@theia/core/lib/browser/tree';
-import { DecoratedTreeNode } from '@theia/core/lib/browser/tree/tree-decorator';
+import { TreeImpl, TreeNode, CompositeTreeNode, SelectableTreeNode, ExpandableTreeNode } from '../tree';
+import { DecoratedTreeNode } from '../tree/tree-decorator';
 
 export interface TxrPatternNode extends CompositeTreeNode, ExpandableTreeNode, SelectableTreeNode, DecoratedTreeNode {
     txrFileUri: string;
