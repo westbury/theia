@@ -21,7 +21,8 @@ import { inject, injectable } from 'inversify';
 import {
     CommandRegistry, isOSX, ActionMenuNode, CompositeMenuNode,
     MAIN_MENU_BAR, MenuModelRegistry, MenuPath, MenuNode,
-    DisposableCollection
+    DisposableCollection,
+    CommandState
 } from '../../common';
 import { Keybinding } from '../../common/keybinding';
 import { PreferenceService, KeybindingRegistry, CommonCommands } from '../../browser';
@@ -177,13 +178,17 @@ export class ElectronMainMenuFactory {
                 const node = menu.altNode && this.context.altPressed ? menu.altNode : menu;
                 const commandId = node.action.commandId;
 
+                if (commandId === 'git-diff:open-file-diff') {
+                    // eslint-disable-next-line no-console
+                    console.debug('nigel');
+                }
+
                 // That is only a sanity check at application startup.
                 if (!this.commandRegistry.getCommand(commandId)) {
                     throw new Error(`Unknown command with ID: ${commandId}.`);
                 }
 
-                const visibilityTracker = this.commandRegistry.trackVisible(commandId, ...args);
-                const enablementTracker = this.commandRegistry.trackEnabled(commandId, ...args);
+                const stateTracker = this.commandRegistry.trackActiveState(commandId, ...args);
 
                 const bindings = this.keybindingRegistry.getKeybindingsForCommand(commandId);
 
@@ -197,8 +202,8 @@ export class ElectronMainMenuFactory {
 
                 const itemTracker = {
                     node,
-                    enabled: enablementTracker.value,
-                    visible: visibilityTracker.value,
+                    enabled: stateTracker.value === CommandState.Active,
+                    visible: stateTracker.value !== CommandState.Hidden,
                 };
 
                 const menuItem = {
@@ -220,10 +225,8 @@ export class ElectronMainMenuFactory {
                     }
                 }
 
-                visibilityTracker.onChange(v => this.updateVisibleState(itemTracker, v, options));
-                enablementTracker.onChange(e => this.updateEnabledState(itemTracker, e, options));
-                this.toDisposeOnMenuRecreation.push(visibilityTracker);
-                this.toDisposeOnMenuRecreation.push(enablementTracker);
+                stateTracker.onChange(v => this.updateMenuItemState(itemTracker, v, options));
+                this.toDisposeOnMenuRecreation.push(stateTracker);
 
                 items.push(menuItem);
 
@@ -237,23 +240,13 @@ export class ElectronMainMenuFactory {
         return items;
     }
 
-    protected updateVisibleState(item: MenuItemTracker, visible: boolean, options?: ElectronMenuOptions): void {
+    protected updateMenuItemState(item: MenuItemTracker, menuItemState: CommandState, options?: ElectronMenuOptions): void {
         // The menu will most likely have been built by the time the first change comes in, but just
         // in case not, update the menu item options before checking the menu itself.
-        if (item.visible !== visible) {
+        const visible = menuItemState !== CommandState.Hidden;
+        const enabled = menuItemState === CommandState.Active;
+        if (item.visible !== visible || item.enabled !== enabled) {
             item.visible = visible;
-            if (this._menu) {
-                const menuItem = this._menu.getMenuItemById(item.node.id);
-                menuItem.visible = this.reallyVisible(item, options);
-                this.setMenu(this._menu);
-            }
-        }
-    }
-
-    protected updateEnabledState(item: MenuItemTracker, enabled: boolean, options?: ElectronMenuOptions): void {
-        // The menu will most likely have been built by the time the first change comes in, but just
-        // in case not, update the menu item options before checking the menu itself.
-        if (item.enabled !== enabled) {
             item.enabled = enabled;
             if (this._menu) {
                 const menuItem = this._menu.getMenuItemById(item.node.id);

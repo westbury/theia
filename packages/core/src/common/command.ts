@@ -108,15 +108,10 @@ export interface CommandHandler {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     isToggled?(...args: any[]): boolean;
     /**
-     * Track whether this handler is visible (active).
+     * Track whether this handler is visible (active), visible but disabled, or hidden.
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    trackVisible?(...args: any[]): HandlerPropertyTracker;
-    /**
-     * Track whether this handler is enabled (active).
-     */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    trackEnabled?(...args: any[]): HandlerPropertyTracker;
+    trackActiveState?(...args: any[]): HandlerPropertyTracker;
 }
 
 export const CommandContribution = Symbol('CommandContribution');
@@ -164,10 +159,16 @@ export interface CommandService {
     readonly onDidExecuteCommand: Event<CommandEvent>;
 }
 
+export enum CommandState {
+    Active,
+    Disabled,
+    Hidden
+}
+
 export interface HandlerPropertyTracker extends Disposable {
-    readonly value: boolean;
+    readonly value: CommandState;
     readonly untrackable: boolean;
-    readonly onChange: Event<boolean>;
+    readonly onChange: Event<CommandState>;
 }
 
 /**
@@ -282,51 +283,6 @@ export class CommandRegistry implements CommandService {
     }
 
     /**
-     * Legacy handlers will have `isEnabled` implemented but no `trackEnabled`implemented,
-     * even when enablement may change when something like the selection changes.  We can't
-     * track these 'untrackable' handlers so we must set them as always enabled so they show
-     * in Electron menus.
-     *
-     * Note: This method assumes that if a handler is not visible then it will also indicate that it is not enabled.
-     * This assumption saves us from having to consider the visibility of handlers here.
-     */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    trackEnabled(commandId: string, ...args: any[]): HandlerPropertyTracker {
-        const onChangeEmitter: Emitter<boolean> = new Emitter();
-        const toDispose = new DisposableCollection(onChangeEmitter);
-
-        const handlers = this._handlers[commandId];
-        const handlerTrackers = handlers.map(handler => {
-            try {
-                if (handler.trackEnabled) {
-                    const handlerTracker = handler.trackEnabled(...args);
-                    toDispose.push(handlerTracker);
-                    const tracker = { value: handlerTracker.value, untrackable: false };
-                    handlerTracker.onChange(isEnabled => {
-                        tracker.value = isEnabled;
-                        onChangeEmitter.fire(handlerTrackers.some(t => t.value));
-                    });
-                    return tracker;
-                } else if (handler.isEnabled) {
-                    return { value: handler.isEnabled(...args), untrackable: true };
-                } else {
-                    return { value: true, untrackable: false };
-                }
-            } catch (error) {
-                console.error(error);
-                return { value: false, untrackable: false };
-            }
-        });
-
-        return {
-            value: handlerTrackers.some(t => t.value),
-            untrackable: handlerTrackers.some(t => t.untrackable),
-            onChange: onChangeEmitter.event,
-            dispose: () => toDispose.dispose()
-        };
-    }
-
-    /**
      * Test whether there is a visible handler for the given command.
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -335,42 +291,57 @@ export class CommandRegistry implements CommandService {
     }
 
     /**
-     * Comments for trackEnabled also apply here.
+     * Ideally all handlers with dynamic enablement will implement `trackEnabled`. ('Dynamic enablement' meaning handlers where isEnabled can
+     * return different values for the identical args) However some implement only `isEnabled` and `isVisible`.
+     * This means we can't fire change events when the enablement or visibility changes.  So, if any handler
+     * implements`isEnabled` or `isVisible` but not `trackActiveState` then we indicate this is untrackable.
+     * This will result in menu items for such commands always being visible and enabled in Electron.
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    trackVisible(commandId: string, ...args: any[]): HandlerPropertyTracker {
-        const onChangeEmitter: Emitter<boolean> = new Emitter();
+    trackActiveState(commandId: string, ...args: any[]): HandlerPropertyTracker {
+        const onChangeEmitter: Emitter<CommandState> = new Emitter();
         const toDispose = new DisposableCollection(onChangeEmitter);
 
         const handlers = this._handlers[commandId];
-        const handlerTrackers = handlers.map(handler => {
+        const handlerTrackers = !handlers ? [] : handlers.map(handler => {
             try {
-                if (handler.trackVisible) {
-                    const handlerTracker = handler.trackVisible(...args);
+                if (handler.trackActiveState) {
+                    const handlerTracker = handler.trackActiveState(...args);
                     toDispose.push(handlerTracker);
                     const tracker = { value: handlerTracker.value, untrackable: false };
-                    handlerTracker.onChange(isVisible => {
-                        tracker.value = isVisible;
-                        onChangeEmitter.fire(handlerTrackers.some(t => t.value));
+                    handlerTracker.onChange(newValue => {
+                        tracker.value = newValue;
+                        onChangeEmitter.fire(this.getCommandStateGivenHandlerStates(handlerTrackers));
                     });
                     return tracker;
-                } else if (handler.isVisible) {
-                    return { value: handler.isVisible(...args), untrackable: true };
                 } else {
-                    return { value: true, untrackable: false };
+                    const enabled = handler.isEnabled ? handler.isEnabled(...args) : true;
+                    const visible = handler.isVisible ? handler.isVisible(...args) : true;
+                    return {
+                        value: visible ? enabled ? CommandState.Active : CommandState.Disabled : CommandState.Hidden,
+                        untrackable: true
+                    };
                 }
             } catch (error) {
                 console.error(error);
-                return { value: false, untrackable: false };
+                return { value: CommandState.Hidden, untrackable: false };
             }
         });
 
         return {
-            value: handlerTrackers.some(t => t.value),
+            value: handlerTrackers.some(t => t.value === CommandState.Active) ? CommandState.Active
+                : handlerTrackers.some(t => t.value === CommandState.Disabled) ? CommandState.Disabled
+                : CommandState.Hidden,
             untrackable: handlerTrackers.some(t => t.untrackable),
             onChange: onChangeEmitter.event,
             dispose: () => toDispose.dispose()
         };
+    }
+
+    protected getCommandStateGivenHandlerStates(handlerTrackers: { value: CommandState, untrackable: boolean }[]): CommandState {
+        return handlerTrackers.some(t => t.value === CommandState.Active) ? CommandState.Active
+            : handlerTrackers.some(t => t.value === CommandState.Disabled) ? CommandState.Disabled
+            : CommandState.Hidden;
     }
 
     /**
@@ -432,11 +403,13 @@ export class CommandRegistry implements CommandService {
         if (handlers) {
             for (const handler of handlers) {
                 try {
-                    if (handler.trackEnabled) {
-                        if (handler.trackEnabled(...args).value) {
+                    if (handler.trackActiveState) {
+                        const handlerTracker = handler.trackActiveState(...args);
+                        handlerTracker.dispose();  // TODO a bit hacky to call this only to dispose
+                        if (handlerTracker.value) {
                             return handler;
                         }
-                    } else if (handler.isEnabled) {
+                    } else if (handler.isEnabled) { // TODO what if it is not visible???
                         if (handler.isEnabled(...args)) {
                             return handler;
                         }

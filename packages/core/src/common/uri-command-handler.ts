@@ -19,7 +19,7 @@
 import { SelectionService } from '../common/selection-service';
 import { UriSelection } from '../common/selection';
 import { Emitter } from '../common/event';
-import { CommandHandler, HandlerPropertyTracker } from './command';
+import { CommandHandler, HandlerPropertyTracker, CommandState } from './command';
 import { MaybeArray } from '.';
 import URI from './uri';
 import { DisposableCollection } from './disposable';
@@ -121,63 +121,49 @@ export class UriAwareCommandHandler<T extends MaybeArray<URI>> implements UriCom
      * @param args passed on as-is to the handler if the first arg is a URI or URI[], otherwise
      *          the URI or URI[] is obtained from the current selection and prepended to args.
      */
-    trackVisible(...args: any[]): HandlerPropertyTracker {
-        const onChangeEmitter: Emitter<boolean> = new Emitter();
+     trackActiveState(...args: any[]): HandlerPropertyTracker {
+        const onChangeEmitter: Emitter<CommandState> = new Emitter();
         const toDispose = new DisposableCollection(onChangeEmitter);
 
         const uri = this.getUriFromArgs(...args);
         if (!uri) {
             // uri not specified in args, so it is coming from selection, so it may change
             toDispose.push(this.selectionService.onSelectionChanged(selection => {
-                const uriOrUris = this.getUriFromSelection(selection);
-                if (uriOrUris) {
-                    const newValue = this.handler.isVisible
-                        ? this.handler.isVisible(uriOrUris, ...args)
-                        : true;
-                    onChangeEmitter.fire(newValue);
-                } else {
-                    onChangeEmitter.fire(false);
-                }
+                const handlerState = this.getHandlerStateGivenSelection(selection, args);
+                onChangeEmitter.fire(handlerState);
             }));
+            return {
+                value: this.getHandlerStateGivenSelection(this.selectionService.selection, args),
+                untrackable: false,
+                onChange: onChangeEmitter.event, dispose: () => toDispose.dispose()
+            };
         }
 
+        // Uri is specified as first of the args, so does not come from selection
         return {
-            value: this.isVisible(args),
+            value: this.getHandlerState(uri, ...args.slice(1)),
             untrackable: false,
             onChange: onChangeEmitter.event, dispose: () => toDispose.dispose()
         };
     }
 
-    /**
-     *
-     * @param args passed on as-is to the handler if the first arg is a URI or URI[], otherwise
-     *          the URI or URI[] is obtained from the current selection and prepended to args.
-     */
-    trackEnabled(...args: any[]): HandlerPropertyTracker {
-        const onChangeEmitter: Emitter<boolean> = new Emitter();
-        const toDispose = new DisposableCollection(onChangeEmitter);
-
-        const uri = this.getUriFromArgs(...args);
-        if (!uri) {
-            // uri not specified in args, so it is coming from selection, so it may change
-            toDispose.push(this.selectionService.onSelectionChanged(selection => {
-                const uriOrUris = this.getUriFromSelection(selection);
-                if (uriOrUris) {
-                    const newValue = this.handler.isEnabled
-                        ? this.handler.isEnabled(uriOrUris, ...args)
-                        : true;
-                    onChangeEmitter.fire(newValue);
-                } else {
-                    onChangeEmitter.fire(false);
-                }
-            }));
+    protected getHandlerStateGivenSelection(selection: Object | undefined, args: any[]): CommandState {
+        const uriOrUris = this.getUriFromSelection(selection);
+        if (uriOrUris) {
+            return this.getHandlerState(uriOrUris, ...args);
+        } else {
+            return CommandState.Disabled;
         }
+    }
 
-        return {
-            value: this.isEnabled(args),
-            untrackable: false,
-            onChange: onChangeEmitter.event, dispose: () => toDispose.dispose()
-        };
+    protected getHandlerState(uriOrUris: T, ...args: any[]): CommandState {
+        const visible = this.handler.isVisible
+            ? this.handler.isVisible(uriOrUris, ...args)
+            : true;
+        const enabled = this.handler.isEnabled
+            ? this.handler.isEnabled(uriOrUris, ...args)
+            : true;
+        return visible ? enabled ? CommandState.Active : CommandState.Disabled : CommandState.Hidden;
     }
 
     protected isMulti(): boolean | undefined {
