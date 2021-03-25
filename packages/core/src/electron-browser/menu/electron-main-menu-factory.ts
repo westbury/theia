@@ -211,8 +211,8 @@ export class ElectronMainMenuFactory {
                     label: node.label,
                     type: this.commandRegistry.getToggledHandler(commandId, ...args) ? 'checkbox' : 'normal',
                     checked: this.commandRegistry.isToggled(commandId, ...args),
-                    enabled: (untrackableAlwaysActive && enablementTracker.untrackable) || itemTracker.enabled,
-                    visible: (untrackableAlwaysActive && visibilityTracker.untrackable) || this.reallyVisible(itemTracker, options),
+                    enabled: (untrackableAlwaysActive && stateTracker.untrackable) || itemTracker.enabled,
+                    visible: (untrackableAlwaysActive && stateTracker.untrackable) || this.reallyVisible(itemTracker, options),
                     accelerator,
                     click: () => this.execute(commandId, args)
                 } as Electron.MenuItemConstructorOptions;

@@ -329,9 +329,7 @@ export class CommandRegistry implements CommandService {
         });
 
         return {
-            value: handlerTrackers.some(t => t.value === CommandState.Active) ? CommandState.Active
-                : handlerTrackers.some(t => t.value === CommandState.Disabled) ? CommandState.Disabled
-                : CommandState.Hidden,
+            value: this.getCommandStateGivenHandlerStates(handlerTrackers),
             untrackable: handlerTrackers.some(t => t.untrackable),
             onChange: onChangeEmitter.event,
             dispose: () => toDispose.dispose()
