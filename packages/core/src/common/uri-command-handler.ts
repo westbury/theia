@@ -77,7 +77,7 @@ export class UriAwareCommandHandler<T extends MaybeArray<URI>> implements UriCom
     }
 
     protected getUri(...args: any[]): T | undefined {
-        return this.getUriFromArgs(...args) || this.getUriFromSelection(this.selectionService.selection);
+        return this.getUriFromArgs(...args) ?? this.getUriFromSelection(this.selectionService.selection);
     }
 
     protected getArgsWithUri(...args: any[]): [T | undefined, ...any[]] {
