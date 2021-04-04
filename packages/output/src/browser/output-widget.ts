@@ -18,7 +18,7 @@ import '../../src/browser/style/output.css';
 import { inject, injectable, postConstruct } from 'inversify';
 import { toArray } from '@phosphor/algorithm';
 import { IDragEvent } from '@phosphor/dragdrop';
-import { EditorWidget } from '@theia/editor/lib/browser';
+import { EditorWidget, EditorManager, EditorOpenerOptions, Range } from '@theia/editor/lib/browser';
 import { MonacoEditor } from '@theia/monaco/lib/browser/monaco-editor';
 import { SelectionService } from '@theia/core/lib/common/selection-service';
 import { MonacoEditorProvider } from '@theia/monaco/lib/browser/monaco-editor-provider';
@@ -27,6 +27,7 @@ import { Message, BaseWidget, DockPanel, Widget, MessageLoop, StatefulWidget } f
 import { OutputUri } from '../common/output-uri';
 import { OutputChannelManager, OutputChannel } from '../common/output-channel';
 import { Emitter, Event, deepClone } from '@theia/core';
+import URI from '@theia/core/lib/common/uri';
 
 @injectable()
 export class OutputWidget extends BaseWidget implements StatefulWidget {
@@ -41,6 +42,8 @@ export class OutputWidget extends BaseWidget implements StatefulWidget {
 
     @inject(OutputChannelManager)
     protected readonly outputChannelManager: OutputChannelManager;
+
+    @inject(EditorManager) protected readonly editorManager: EditorManager;
 
     protected _state: OutputWidget.State = { locked: false };
     protected readonly editorContainer: DockPanel;
@@ -83,11 +86,30 @@ export class OutputWidget extends BaseWidget implements StatefulWidget {
                 },
             resolveLink:
                 (link: monaco.languages.ILink, token: monaco.CancellationToken):
-                    monaco.languages.ProviderResult<monaco.languages.ILink> => (
+                    monaco.languages.ProviderResult<monaco.languages.ILink> => {
                   // Call method to set position on the editor
-                  {range: link.range}
-        )
-          });
+
+                  const node = {
+                      line: 17,
+                      character: 8,
+                      length: 10
+                  }
+                  const selection: Range = {
+                    start: {
+                        line: node.line - 1,
+                        character: node.character - 1
+                    },
+                    end: {
+                        line: node.line - 1,
+                        character: node.character - 1 + node.length
+                    }
+                };
+        
+                this.showInEditor(selection);
+
+                return {range: link.range};
+            }
+        });
 
         this.toDispose.pushAll([
             this.outputChannelManager.onChannelWasHidden(() => this.refreshEditorWidget()),
@@ -102,6 +124,18 @@ export class OutputWidget extends BaseWidget implements StatefulWidget {
     storeState(): object {
         return this.state;
     }
+
+    private async showInEditor(selection: Range): Promise<void> {
+        const opts: EditorOpenerOptions = {
+            selection,
+            mode: 'reveal'
+        };
+
+        const fileUri = new URI('file:///c:/Users/nigwes01/Projects'        
+        const editorWidget = await this.editorManager.open(fileUri, opts);
+        
+        // this.decorateEditor(resultNode, editorWidget);
+}
 
     restoreState(oldState: object & Partial<OutputWidget.State>): void {
         const copy = deepClone(this.state);
