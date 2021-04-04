@@ -63,6 +63,32 @@ export class OutputWidget extends BaseWidget implements StatefulWidget {
 
     @postConstruct()
     protected init(): void {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        monaco.languages.registerLinkProvider({ scheme: 'output', hasAccessToAllModels: true } as any as string, {
+//            monaco.languages.registerLinkProvider('cppOutput', {
+                provideLinks:
+                (model: monaco.editor.ITextModel, token: monaco.CancellationToken):
+                    monaco.languages.ProviderResult<monaco.languages.ILinksList> => {
+                const endColumn = 10;
+                return {
+                    links: [{
+                      range: {
+                        startLineNumber: 1,
+                        startColumn: 1,
+                        endLineNumber: 2,
+                        endColumn
+                      }
+                    }]
+                  };
+                },
+            resolveLink:
+                (link: monaco.languages.ILink, token: monaco.CancellationToken):
+                    monaco.languages.ProviderResult<monaco.languages.ILink> => (
+                  // Call method to set position on the editor
+                  {range: link.range}
+        )
+          });
+
         this.toDispose.pushAll([
             this.outputChannelManager.onChannelWasHidden(() => this.refreshEditorWidget()),
             this.outputChannelManager.onChannelWasShown(({ preserveFocus }) => this.refreshEditorWidget({ preserveFocus: !!preserveFocus })),
@@ -211,6 +237,7 @@ export class OutputWidget extends BaseWidget implements StatefulWidget {
         }
         const { name } = this.selectedChannel;
         const editor = await this.editorProvider.get(OutputUri.create(name));
+        editor.setLanguage('cppOutput');
         return new EditorWidget(editor, this.selectionService);
     }
 
