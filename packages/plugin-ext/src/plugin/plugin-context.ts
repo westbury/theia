@@ -725,6 +725,54 @@ export function createAPIFactory(
             },
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             getPlugin(pluginId: string): theia.Plugin<any> | undefined {
+                if (pluginId === 'vscode.git') {
+                    return {
+                        id: 'vscode.git',
+
+                        /**
+                         * The absolute file path of the directory containing this plug-in.
+                         */
+                        pluginPath: '<none>',
+
+                        /**
+                         * The uri of the directory containing this plug-in.
+                         */
+                        pluginUri: URI.parse(plugin.pluginUri),
+
+                        /**
+                         * `true` if the plug-in has been activated.
+                         */
+                        isActive: true,
+
+                        /**
+                         * The parsed contents of the plug-in's package.json.
+                         */
+                        packageJSON: {},
+
+                        /**
+                         *
+                         */
+                        pluginType: 'backend',
+
+                        /**
+                         * The public API exported by this plug-in. It is an invalid action
+                         * to access this field before this plug-in has been activated.
+                         */
+                        exports: {
+                            enabled: true,
+                            getAPI: (version: number) => ({
+                                git: { path: 'git' }
+                            })
+                        },
+
+                        /**
+                         * Activates this plug-in and returns its public API.
+                         *
+                         * @return A promise that will resolve when this plug-in has been activated.
+                         */
+                        activate: () => Promise.resolve()
+                    };
+                }
                 const plg = pluginManager.getPluginById(pluginId.toLowerCase());
                 if (plg) {
                     return new Plugin(pluginManager, plg);

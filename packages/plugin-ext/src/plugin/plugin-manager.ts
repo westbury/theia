@@ -264,6 +264,10 @@ export class PluginManagerExtImpl implements PluginManagerExt, PluginManager {
     }
 
     protected async loadPlugin(plugin: Plugin, configStorage: ConfigStorage, visited = new Set<string>()): Promise<boolean> {
+        if (plugin.model.displayName === 'Git Native') {
+            // Natives are not deployed
+            return true;
+        }
         // in order to break cycles
         if (visited.has(plugin.model.id)) {
             return true;

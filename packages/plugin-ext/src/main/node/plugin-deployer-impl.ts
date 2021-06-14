@@ -122,7 +122,14 @@ export class PluginDeployerImpl implements PluginDeployer {
             this.resolvePlugins(context.userEntries, PluginType.User),
             this.resolvePlugins(context.systemEntries, PluginType.System)
         ]);
-        await this.deployPlugins([...userPlugins, ...systemPlugins]);
+
+        const originId = 'package:/theia/git';
+        const pluginEntry = new PluginDeployerEntryImpl(originId, 'vscode.git');
+        pluginEntry.setResolvedBy('TheiaPackageResolver');
+        pluginEntry.accept(PluginDeployerEntryType.BACKEND);
+        const fakePlugins: PluginDeployerEntry[] = [pluginEntry];
+
+        await this.deployPlugins([...fakePlugins, ...userPlugins, ...systemPlugins]);
         this.logMeasurement('Deploy plugins list', startDeployTime);
     }
 
