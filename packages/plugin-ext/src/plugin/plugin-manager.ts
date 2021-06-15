@@ -266,8 +266,26 @@ export class PluginManagerExtImpl implements PluginManagerExt, PluginManager {
     protected async loadPlugin(plugin: Plugin, configStorage: ConfigStorage, visited = new Set<string>()): Promise<boolean> {
         if (plugin.model.displayName === 'Git Native') {
             // Natives are not deployed
+
+            // but we must add to 'activated' list.  That is where plugins are found when something depends on it,
+            // and where its API is found.
+            // TODO this is not used from activatedPlugins....
+            console.log(`plugin ${plugin.model.id} is native and being set as activated.`);
+            const pluginContext = this.createContext(plugin, configStorage);
+            this.pluginContextsMap.set(plugin.model.id, pluginContext);
+
+            const pluginMain = {
+                enabled: true,
+                getAPI: (version: number) => ({
+                    git: { path: 'git' }
+                })
+            };
+
+            this.activatedPlugins.set(plugin.model.id, new ActivatedPlugin(pluginContext, pluginMain));
+
             return true;
         }
+
         // in order to break cycles
         if (visited.has(plugin.model.id)) {
             return true;
@@ -344,8 +362,7 @@ export class PluginManagerExtImpl implements PluginManagerExt, PluginManager {
         }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private async startPlugin(plugin: Plugin, configStorage: ConfigStorage, pluginMain: any): Promise<void> {
+    private createContext(plugin: Plugin, configStorage: ConfigStorage): theia.PluginContext {
         const subscriptions: theia.Disposable[] = [];
         const asAbsolutePath = (relativePath: string): string => join(plugin.pluginFolder, relativePath);
         const logPath = join(configStorage.hostLogPath, plugin.model.id); // todo check format
@@ -367,6 +384,12 @@ export class PluginManagerExtImpl implements PluginManagerExt, PluginManager {
             globalStorageUri: Uri.file(globalStoragePath),
             environmentVariableCollection: this.terminalService.getEnvironmentVariableCollection(plugin.model.id)
         };
+        return pluginContext;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private async startPlugin(plugin: Plugin, configStorage: ConfigStorage, pluginMain: any): Promise<void> {
+        const pluginContext = this.createContext(plugin, configStorage);
         this.pluginContextsMap.set(plugin.model.id, pluginContext);
 
         let stopFn = undefined;
@@ -388,6 +411,16 @@ export class PluginManagerExtImpl implements PluginManagerExt, PluginManager {
         return Array.from(this.registry.values());
     }
     getPluginExport(pluginId: string): PluginAPI | undefined {
+        if (pluginId === 'vscode.git') {
+            const pluginMain = {
+                enabled: true,
+                getAPI: (version: number) => ({
+                    git: { path: 'git' }
+                })
+            };
+            return pluginMain;
+        }
+
         const activePlugin = this.activatedPlugins.get(pluginId);
         if (activePlugin) {
             return activePlugin.exports;
@@ -396,6 +429,7 @@ export class PluginManagerExtImpl implements PluginManagerExt, PluginManager {
     }
 
     getPluginById(pluginId: string): Plugin | undefined {
+        // return this.impersonatorRegistry.get(pluginId) ?? this.registry.get(pluginId);
         return this.registry.get(pluginId);
     }
 

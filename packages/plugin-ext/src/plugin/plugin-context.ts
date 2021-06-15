@@ -727,7 +727,7 @@ export function createAPIFactory(
             getPlugin(pluginId: string): theia.Plugin<any> | undefined {
                 if (pluginId === 'vscode.git') {
                     return {
-                        id: 'vscode.git',
+                        id: pluginId,
 
                         /**
                          * The absolute file path of the directory containing this plug-in.
@@ -758,12 +758,7 @@ export function createAPIFactory(
                          * The public API exported by this plug-in. It is an invalid action
                          * to access this field before this plug-in has been activated.
                          */
-                        exports: {
-                            enabled: true,
-                            getAPI: (version: number) => ({
-                                git: { path: 'git' }
-                            })
-                        },
+                        exports: pluginManager.getPluginExport(pluginId),
 
                         /**
                          * Activates this plug-in and returns its public API.
