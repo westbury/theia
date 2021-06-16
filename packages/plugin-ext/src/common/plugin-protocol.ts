@@ -384,11 +384,21 @@ export enum PluginDeployerEntryType {
 }
 
 /**
- * Whether a plugin installed by a user or system.
+ * Each plugin can be either of system or user type indicating that it was deployed by an embedding
+ * product or an end user.
+ * - System plugins are considered to be built built-in plugins. By default they are collected from
+ * `THEIA_DEFAULT_PLUGINS`, `THEIA_PLUGINS` variables or can be provided via `--plugins` cli option.
+ * - User plugins can are managed by an end user. They are stored either under user config plugins
+ * or extensions folder depending whether it is Theia plugin or VS Code extension.
+ * These plugins can survive the server restart.
+ * - Impersonator plugins are implemented in the backend code, so code can be injected using
+ * Inversify.  These plugins have the same id as a real vscode plugin.  They impersonate the real plugin
+ * and will satisfy any dependency that a real vscode plugin may have on the plugin.
  */
 export enum PluginType {
     System,
-    User
+    User,
+    Impersonator
 };
 
 export interface PluginDeployerEntry {
@@ -792,7 +802,7 @@ export interface PluginDependencies {
 
 export const PluginDeployerHandler = Symbol('PluginDeployerHandler');
 export interface PluginDeployerHandler {
-    deployImpersonatorPlugin(impersonatorPlugin: PluginDeployerEntry): Promise<void>;
+    deployImpersonatorPlugin(impersonatorPlugin: PluginModel): Promise<void>;
 
     deployFrontendPlugins(frontendPlugins: PluginDeployerEntry[]): Promise<void>;
     deployBackendPlugins(backendPlugins: PluginDeployerEntry[]): Promise<void>;

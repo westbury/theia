@@ -123,11 +123,19 @@ export class PluginDeployerImpl implements PluginDeployer {
             this.resolvePlugins(context.systemEntries, PluginType.System)
         ]);
 
-        const originId = 'package:/theia/git';
-        const gitPluginEntry = new PluginDeployerEntryImpl(originId, 'vscode.git');
-        gitPluginEntry.setResolvedBy('TheiaPackageResolver');
-        gitPluginEntry.accept(PluginDeployerEntryType.BACKEND);
-        await this.pluginDeployerHandler.deployImpersonatorPlugin(gitPluginEntry);
+        const gitPluginModel = {
+            id: 'vscode.git',
+            name: 'git',
+            publisher: 'theia',
+            version: '1.14.0',
+            displayName: 'Git Native',
+            description: 'Git plugin implemented in package',
+            engine: { type: '', version: '' },
+            entryPoint: {},
+            packageUri: '',
+            packagePath: ''
+        };
+        await this.pluginDeployerHandler.deployImpersonatorPlugin(gitPluginModel);
 
         await this.deployPlugins([...userPlugins, ...systemPlugins]);
         this.logMeasurement('Deploy plugins list', startDeployTime);

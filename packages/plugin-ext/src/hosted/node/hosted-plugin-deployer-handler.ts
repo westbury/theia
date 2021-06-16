@@ -17,7 +17,10 @@
 import * as fs from '@theia/core/shared/fs-extra';
 import { injectable, inject } from '@theia/core/shared/inversify';
 import { ILogger } from '@theia/core';
-import { PluginDeployerHandler, PluginDeployerEntry, PluginEntryPoint, DeployedPlugin, PluginDependencies } from '../../common/plugin-protocol';
+import {
+    PluginDeployerHandler, PluginDeployerEntry, PluginEntryPoint, DeployedPlugin, PluginDependencies,
+    PluginModel, PluginMetadata, PluginType
+} from '../../common/plugin-protocol';
 import { HostedPluginReader } from './plugin-reader';
 import { Deferred } from '@theia/core/lib/common/promise-util';
 
@@ -117,10 +120,6 @@ export class HostedPluginDeployerHandler implements PluginDeployerHandler {
 
             const metadata = this.reader.readMetadata(manifest);
 
-            const deployedLocations = this.deployedLocations.get(metadata.model.id) || new Set<string>();
-            deployedLocations.add(entry.rootPath);
-            this.deployedLocations.set(metadata.model.id, deployedLocations);
-
             const deployedPlugins = entryPoint === 'backend' ? this.deployedBackendPlugins : this.deployedFrontendPlugins;
             if (deployedPlugins.has(metadata.model.id)) {
                 return;
@@ -139,54 +138,24 @@ export class HostedPluginDeployerHandler implements PluginDeployerHandler {
     /**
      * @throws never! in order to isolate plugin deployment
      */
-    public async deployImpersonatorPlugin(entry: PluginDeployerEntry): Promise<void> {
-        const pluginPath = entry.path();
+    public async deployImpersonatorPlugin(model: PluginModel): Promise<void> {
         try {
-            // assume git
-            const manifest = {
-                name: 'Git native',
-                publisher: 'Theia',
-                version: '1.14.0',
-                engines: {
-                },
-                displayName: 'Git Native',
-                description: 'Git plugin implemented in package',
-                packagePath: 'foowah',
-            };
-
-            const metadata = {
+            const metadata: PluginMetadata = {
                 host: 'main',
-                model: {
-                    id: 'vscode.git',
-                    name: 'git',
-                    publisher: 'theia',
-                    version: '1.14.0',
-                    displayName: 'Git Native',
-                    description: 'Git plugin implemented in package',
-                    engine: { type: '', version: '' },
-                    entryPoint: {},
-                    packageUri: '',
-                    packagePath: ''
-                },
+                model,
                 lifecycle: { startMethod: 'activate', stopMethod: 'deactivate' }
             };
-
-            const deployedLocations = this.deployedLocations.get(metadata.model.id) || new Set<string>();
-            deployedLocations.add(entry.rootPath);
-            this.deployedLocations.set(metadata.model.id, deployedLocations);
 
             const deployedPlugins = this.deployedBackendPlugins;
             if (deployedPlugins.has(metadata.model.id)) {
                 return;
             }
 
-            const { type } = entry;
-            const deployed: DeployedPlugin = { metadata, type };
-            deployed.contributes = pluginPath === undefined ? {} : this.reader.readContribution(manifest);
+            const deployed: DeployedPlugin = { metadata, type: PluginType.System };
             deployedPlugins.set(metadata.model.id, deployed);
-            this.logger.info(`Deploying impersonator plugin "${metadata.model.name}@${metadata.model.version}"`);
+            this.logger.info(`Deploying impersonator plugin "${model.name}@${model.version}"`);
         } catch (e) {
-            console.error(`Failed to deploy impersonator plugin from '${pluginPath}' path`, e);
+            console.error(`Failed to deploy impersonator plugin '${model.name}@${model.version}'.`, e);
         }
     }
 
