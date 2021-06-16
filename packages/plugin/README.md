@@ -746,6 +746,11 @@ function provideRanges(document: theia.TextDocument): theia.ProviderResult<theia
 }
 ```
 
+#### Impersonator Plugins
+
+A package can impersonate a VS-Code plugin.  This is useful when installing a plugin that has a dependency on another plugin, but you, as an extender, don't want to use the plugin that is listed as a dependency.  You may prefer to use a native Theia package.  For example, you may wish to use the @theia/git package but you still want to allow users to install plugins that list a dependency on the VS-Code Git built-in.
+
+
 ## Additional Information
 
 - [API documentation for `@theia/plugin`](https://eclipse-theia.github.io/theia/docs/next/modules/plugin.html)

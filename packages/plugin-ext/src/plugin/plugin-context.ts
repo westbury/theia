@@ -170,6 +170,7 @@ import { TimelineExtImpl } from './timeline';
 import { ThemingExtImpl } from './theming';
 import { CommentsExtImpl } from './comments';
 import { CustomEditorsExtImpl } from './custom-editors';
+import { ImpersonatorPluginRegistryExtImpl } from './impersonator-plugin-registry';
 
 export function createAPIFactory(
     rpc: RPCProtocol,
@@ -208,6 +209,7 @@ export function createAPIFactory(
     const themingExt = rpc.set(MAIN_RPC_CONTEXT.THEMING_EXT, new ThemingExtImpl(rpc));
     const commentsExt = rpc.set(MAIN_RPC_CONTEXT.COMMENTS_EXT, new CommentsExtImpl(rpc, commandRegistry, documents));
     const customEditorExt = rpc.set(MAIN_RPC_CONTEXT.CUSTOM_EDITORS_EXT, new CustomEditorsExtImpl(rpc, documents, webviewExt, workspaceExt));
+    const impersonatorPluginRegistryExt = rpc.set(MAIN_RPC_CONTEXT.IMPERSONATOR_PLUGIN_REGISTRY_EXT, new ImpersonatorPluginRegistryExtImpl(rpc));
     rpc.set(MAIN_RPC_CONTEXT.DEBUG_EXT, debugExt);
 
     return function (plugin: InternalPlugin): typeof theia {
@@ -451,7 +453,10 @@ export function createAPIFactory(
             },
             onDidChangeActiveColorTheme(listener, thisArg?, disposables?) {
                 return themingExt.onDidChangeActiveColorTheme(listener, thisArg, disposables);
-            }
+            },
+            createImpersonatorPlugin(): theia.ImpersonatorPlugin {
+                return impersonatorPluginRegistryExt.createImpersonatorPlugin();
+            },
         };
 
         const workspace: typeof theia.workspace = {

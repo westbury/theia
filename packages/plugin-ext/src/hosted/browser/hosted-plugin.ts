@@ -406,7 +406,18 @@ export class HostedPluginSupport {
             thenable.push((async () => {
                 try {
                     const activationEvents = [...this.activationEvents];
-                    await manager.$start({ plugins, configStorage, activationEvents });
+                    const impersonatorPlugins = [
+                        {
+                            id: 'vscode.git',
+                            exports: {
+                                enabled: true,
+                                getAPI: (version: number) => ({
+                                    git: { path: 'git' }
+                                })
+                            }
+                        }
+                    ];
+                    await manager.$start({ plugins, impersonatorPlugins, configStorage, activationEvents });
                     if (toDisconnect.disposed) {
                         return;
                     }

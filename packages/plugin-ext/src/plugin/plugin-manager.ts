@@ -208,6 +208,11 @@ export class PluginManagerExtImpl implements PluginManagerExt, PluginManager {
     async $start(params: PluginManagerStartParams): Promise<void> {
         this.configStorage = params.configStorage;
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // for (const plugin of params.impersonatorPlugins) {
+        //     this.registerPlugin(plugin);
+        // }
+
         const [plugins, foreignPlugins] = await this.host.init(params.plugins);
         // add foreign plugins
         for (const plugin of foreignPlugins) {
@@ -410,44 +415,8 @@ export class PluginManagerExtImpl implements PluginManagerExt, PluginManager {
     getAllPlugins(): Plugin[] {
         return Array.from(this.registry.values());
     }
+
     getPluginExport(pluginId: string): PluginAPI | undefined {
-        if (pluginId === 'vscode.git') {
-
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const stringify = (obj: any, prop: any): string => {
-                const placeholder = '____PLACEHOLDER____';
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const fns: Array<any> = [];
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                let json = JSON.stringify(obj, (key: string, value: any): string => {
-                    if (typeof value === 'function') {
-                        fns.push(value);
-                        return placeholder;
-                    }
-                    return value;
-                }, 2);
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                json = json.replace(new RegExp('"' + placeholder + '"', 'g'), function (_): any | undefined {
-                    return fns.shift();
-                });
-                return 'this["' + prop + '"] = ' + json + ';';
-            };
-
-            const activePlugin2 = this.activatedPlugins.get(pluginId);
-            console.log(`active plugin ${activePlugin2?.pluginContext}`);
-            const exports = activePlugin2?.exports;
-            console.log(`active plugin ${stringify(exports, 'exports')}`);
-
-            return exports;
-            // const pluginMain = {
-            //     enabled: true,
-            //     getAPI: (version: number) => ({
-            //         git: { path: 'git' }
-            //     })
-            // };
-            // return pluginMain;
-        }
-
         const activePlugin = this.activatedPlugins.get(pluginId);
         if (activePlugin) {
             return activePlugin.exports;

@@ -54,7 +54,7 @@ import { ViewContextKeyService } from './view/view-context-key-service';
 import { PluginViewWidget, PluginViewWidgetIdentifier } from './view/plugin-view-widget';
 import { TreeViewWidgetIdentifier, VIEW_ITEM_CONTEXT_MENU, PluginTree, TreeViewWidget, PluginTreeModel } from './view/tree-view-widget';
 import { RPCProtocol } from '../../common/rpc-protocol';
-import { LanguagesMainFactory, OutputChannelRegistryFactory } from '../../common';
+import { LanguagesMainFactory, OutputChannelRegistryFactory, ImpersonatorPluginFactory } from '../../common';
 import { LanguagesMainImpl } from './languages-main';
 import { OutputChannelRegistryMainImpl } from './output-channel-registry-main';
 import { WebviewWidget } from './webview/webview';
@@ -75,6 +75,7 @@ import { CustomEditorWidgetFactory } from '../browser/custom-editors/custom-edit
 import { CustomEditorWidget } from './custom-editors/custom-editor-widget';
 import { CustomEditorService } from './custom-editors/custom-editor-service';
 import { UndoRedoService } from './custom-editors/undo-redo-service';
+import { ImpersonatorPluginMainImpl } from './impersonator-plugin-main';
 
 export default new ContainerModule((bind, unbind, isBound, rebind) => {
 
@@ -226,4 +227,11 @@ export default new ContainerModule((bind, unbind, isBound, rebind) => {
     bind(CommentingRangeDecorator).toSelf().inSingletonScope();
     bind(CommentsContribution).toSelf().inSingletonScope();
     bind(CommentsContextKeyService).toSelf().inSingletonScope();
+
+    bind(ImpersonatorPluginMainImpl).toSelf().inTransientScope();
+    bind(ImpersonatorPluginFactory).toFactory(context => () => {
+        const child = context.container.createChild();
+        return child.get(ImpersonatorPluginMainImpl);
+    });
+
 });

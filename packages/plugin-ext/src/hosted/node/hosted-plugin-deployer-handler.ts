@@ -17,7 +17,7 @@
 import * as fs from '@theia/core/shared/fs-extra';
 import { injectable, inject } from '@theia/core/shared/inversify';
 import { ILogger } from '@theia/core';
-import { PluginDeployerHandler, PluginDeployerEntry, PluginEntryPoint, DeployedPlugin, PluginDependencies, PluginPackage, PluginMetadata } from '../../common/plugin-protocol';
+import { PluginDeployerHandler, PluginDeployerEntry, PluginEntryPoint, DeployedPlugin, PluginDependencies } from '../../common/plugin-protocol';
 import { HostedPluginReader } from './plugin-reader';
 import { Deferred } from '@theia/core/lib/common/promise-util';
 
@@ -110,46 +110,12 @@ export class HostedPluginDeployerHandler implements PluginDeployerHandler {
     protected async deployPlugin(entry: PluginDeployerEntry, entryPoint: keyof PluginEntryPoint): Promise<void> {
         const pluginPath = entry.path();
         try {
-            let manifest: PluginPackage | undefined;
-            let metadata: PluginMetadata | undefined;
-            if (pluginPath === undefined) {
-                // assume git
-                manifest = {
-                    name: 'Git native',
-                    publisher: 'Theia',
-                    version: '1.14.0',
-                    engines: {
-                    },
-                    displayName: 'Git Native',
-                    description: 'Git plugin implemented in package',
-                    packagePath: 'foowah',
-                };
-
-                metadata = {
-                    host: 'main',
-                    model: {
-                        id: 'vscode.git',
-                        name: 'git',
-                        publisher: 'theia',
-                        version: '1.14.0',
-                        displayName: 'Git Native',
-                        description: 'Git plugin implemented in package',
-                        engine: { type: '', version: '' },
-                        entryPoint: {},
-                        packageUri: '',
-                        packagePath: ''
-                    },
-                    lifecycle: { startMethod: 'activate', stopMethod: 'deactivate' }
-                };
-            } else {
-
-                manifest = await this.reader.readPackage(pluginPath);
-                if (!manifest) {
-                    return;
-                }
-
-                metadata = this.reader.readMetadata(manifest);
+            const manifest = await this.reader.readPackage(pluginPath);
+            if (!manifest) {
+                return;
             }
+
+            const metadata = this.reader.readMetadata(manifest);
 
             const deployedLocations = this.deployedLocations.get(metadata.model.id) || new Set<string>();
             deployedLocations.add(entry.rootPath);
@@ -167,6 +133,60 @@ export class HostedPluginDeployerHandler implements PluginDeployerHandler {
             this.logger.info(`Deploying ${entryPoint} plugin "${metadata.model.name}@${metadata.model.version}" from "${metadata.model.entryPoint[entryPoint] || pluginPath}"`);
         } catch (e) {
             console.error(`Failed to deploy ${entryPoint} plugin from '${pluginPath}' path`, e);
+        }
+    }
+
+    /**
+     * @throws never! in order to isolate plugin deployment
+     */
+    public async deployImpersonatorPlugin(entry: PluginDeployerEntry): Promise<void> {
+        const pluginPath = entry.path();
+        try {
+            // assume git
+            const manifest = {
+                name: 'Git native',
+                publisher: 'Theia',
+                version: '1.14.0',
+                engines: {
+                },
+                displayName: 'Git Native',
+                description: 'Git plugin implemented in package',
+                packagePath: 'foowah',
+            };
+
+            const metadata = {
+                host: 'main',
+                model: {
+                    id: 'vscode.git',
+                    name: 'git',
+                    publisher: 'theia',
+                    version: '1.14.0',
+                    displayName: 'Git Native',
+                    description: 'Git plugin implemented in package',
+                    engine: { type: '', version: '' },
+                    entryPoint: {},
+                    packageUri: '',
+                    packagePath: ''
+                },
+                lifecycle: { startMethod: 'activate', stopMethod: 'deactivate' }
+            };
+
+            const deployedLocations = this.deployedLocations.get(metadata.model.id) || new Set<string>();
+            deployedLocations.add(entry.rootPath);
+            this.deployedLocations.set(metadata.model.id, deployedLocations);
+
+            const deployedPlugins = this.deployedBackendPlugins;
+            if (deployedPlugins.has(metadata.model.id)) {
+                return;
+            }
+
+            const { type } = entry;
+            const deployed: DeployedPlugin = { metadata, type };
+            deployed.contributes = pluginPath === undefined ? {} : this.reader.readContribution(manifest);
+            deployedPlugins.set(metadata.model.id, deployed);
+            this.logger.info(`Deploying impersonator plugin "${metadata.model.name}@${metadata.model.version}"`);
+        } catch (e) {
+            console.error(`Failed to deploy impersonator plugin from '${pluginPath}' path`, e);
         }
     }
 

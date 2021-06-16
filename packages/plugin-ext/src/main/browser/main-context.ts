@@ -18,7 +18,7 @@ import { CommandRegistryMainImpl } from './command-registry-main';
 import { PreferenceRegistryMainImpl } from './preference-registry-main';
 import { QuickOpenMainImpl } from './quick-open-main';
 import { RPCProtocol } from '../../common/rpc-protocol';
-import { PLUGIN_RPC_CONTEXT, LanguagesMainFactory, OutputChannelRegistryFactory } from '../../common/plugin-api-rpc';
+import { PLUGIN_RPC_CONTEXT, LanguagesMainFactory, OutputChannelRegistryFactory, ImpersonatorPluginFactory } from '../../common/plugin-api-rpc';
 import { MessageRegistryMainImpl } from './message-registry-main';
 import { WindowStateMain } from './window-state-main';
 import { WorkspaceMainImpl } from './workspace-main';
@@ -175,4 +175,9 @@ export function setUpPluginApi(rpc: RPCProtocol, container: interfaces.Container
 
     const commentsMain = new CommentsMainImp(rpc, container);
     rpc.set(PLUGIN_RPC_CONTEXT.COMMENTS_MAIN, commentsMain);
+
+    const impersonatorPluginFactory: ImpersonatorPluginFactory = container.get(ImpersonatorPluginFactory);
+    const impersonatorPluginMain = impersonatorPluginFactory();
+    rpc.set(PLUGIN_RPC_CONTEXT.IMPERSONATOR_PLUGIN_MAIN, impersonatorPluginMain);
+
 }

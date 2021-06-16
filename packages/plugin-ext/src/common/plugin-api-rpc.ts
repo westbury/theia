@@ -18,7 +18,7 @@
 
 import { createProxyIdentifier, ProxyIdentifier, RPCProtocol } from './rpc-protocol';
 import * as theia from '@theia/plugin';
-import { PluginLifecycle, PluginModel, PluginMetadata, PluginPackage, IconUrl, PluginJsonValidationContribution } from './plugin-protocol';
+import { PluginLifecycle, PluginModel, PluginMetadata, ImpersonatorPluginMetadata, PluginPackage, IconUrl, PluginJsonValidationContribution } from './plugin-protocol';
 import { QueryParameters } from './env';
 import { TextEditorCursorStyle } from './editor-options';
 import {
@@ -205,6 +205,7 @@ export interface PluginManagerInitializeParams {
 
 export interface PluginManagerStartParams {
     plugins: PluginMetadata[]
+    impersonatorPlugins: ImpersonatorPluginMetadata[]
     configStorage: ConfigStorage
     activationEvents: string[]
 }
@@ -1460,6 +1461,11 @@ export interface OutputChannelRegistryFactory {
     (): OutputChannelRegistryMain;
 }
 
+export const ImpersonatorPluginFactory = Symbol('ImpersonatorPluginFactory');
+export interface ImpersonatorPluginFactory {
+    (): ImpersonatorPluginMain;
+}
+
 export interface LanguagesMain {
     $getLanguages(): Promise<string[]>;
     $changeLanguage(resource: UriComponents, languageId: string): Promise<void>;
@@ -1723,7 +1729,8 @@ export const PLUGIN_RPC_CONTEXT = {
     LABEL_SERVICE_MAIN: <ProxyIdentifier<LabelServiceMain>>createProxyIdentifier<LabelServiceMain>('LabelServiceMain'),
     TIMELINE_MAIN: <ProxyIdentifier<TimelineMain>>createProxyIdentifier<TimelineMain>('TimelineMain'),
     THEMING_MAIN: <ProxyIdentifier<ThemingMain>>createProxyIdentifier<ThemingMain>('ThemingMain'),
-    COMMENTS_MAIN: <ProxyIdentifier<CommentsMain>>createProxyIdentifier<CommentsMain>('CommentsMain')
+    COMMENTS_MAIN: <ProxyIdentifier<CommentsMain>>createProxyIdentifier<CommentsMain>('CommentsMain'),
+    IMPERSONATOR_PLUGIN_MAIN: <ProxyIdentifier<ImpersonatorPluginMain>>createProxyIdentifier<ImpersonatorPluginMain>('ImpersonatorPluginMain'),
 };
 
 export const MAIN_RPC_CONTEXT = {
@@ -1756,7 +1763,8 @@ export const MAIN_RPC_CONTEXT = {
     LABEL_SERVICE_EXT: createProxyIdentifier<LabelServiceExt>('LabelServiceExt'),
     TIMELINE_EXT: createProxyIdentifier<TimelineExt>('TimeLineExt'),
     THEMING_EXT: createProxyIdentifier<ThemingExt>('ThemingExt'),
-    COMMENTS_EXT: createProxyIdentifier<CommentsExt>('CommentsExt')
+    COMMENTS_EXT: createProxyIdentifier<CommentsExt>('CommentsExt'),
+    IMPERSONATOR_PLUGIN_REGISTRY_EXT: createProxyIdentifier<ImpersonatorPluginRegistryExt>('ImpersonatorPluginRegistryExt'),
 };
 
 export interface TasksExt {
@@ -1818,4 +1826,12 @@ export interface SecretsMain {
     $getPassword(extensionId: string, key: string): Promise<string | undefined>;
     $setPassword(extensionId: string, key: string, value: string): Promise<void>;
     $deletePassword(extensionId: string, key: string): Promise<void>;
+}
+
+export interface ImpersonatorPluginRegistryExt {
+
+}
+
+export interface ImpersonatorPluginMain {
+    $fn(functionName: string, args: any[]): Promise<any>;
 }

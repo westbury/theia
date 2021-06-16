@@ -757,6 +757,12 @@ export interface PluginMetadata {
     lifecycle: PluginLifecycle;
 }
 
+export interface ImpersonatorPluginMetadata {
+    id: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    exports: any;
+}
+
 export const MetadataProcessor = Symbol('MetadataProcessor');
 export interface MetadataProcessor {
     process(pluginMetadata: PluginMetadata): void;
@@ -786,6 +792,8 @@ export interface PluginDependencies {
 
 export const PluginDeployerHandler = Symbol('PluginDeployerHandler');
 export interface PluginDeployerHandler {
+    deployImpersonatorPlugin(impersonatorPlugin: PluginDeployerEntry): Promise<void>;
+
     deployFrontendPlugins(frontendPlugins: PluginDeployerEntry[]): Promise<void>;
     deployBackendPlugins(backendPlugins: PluginDeployerEntry[]): Promise<void>;
 

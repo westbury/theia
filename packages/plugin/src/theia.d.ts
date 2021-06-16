@@ -65,9 +65,9 @@ declare module '@theia/plugin' {
     export type PluginType = 'frontend' | 'backend';
 
     /**
-     * Represents an plugin.
+     * Represents a plugin.
      *
-     * To get an instance of an `Plugin` use [getPlugin](#plugins.getPlugin).
+     * To get an instance of a `Plugin` use [getPlugin](#plugins.getPlugin).
      */
     export interface Plugin<T> {
 
@@ -145,18 +145,18 @@ declare module '@theia/plugin' {
      */
     export namespace plugins {
         /**
-         * Get an plug-in by its full identifier in the form of: `publisher.name`.
+         * Get a plug-in by its full identifier in the form of: `publisher.name`.
          *
-         * @param pluginId An plug-in identifier.
-         * @return An plug-in or `undefined`.
+         * @param pluginId A plug-in identifier.
+         * @return A plug-in or `undefined`.
          */
         export function getPlugin(pluginId: string): Plugin<any> | undefined;
 
         /**
-         * Get an plug-in its full identifier in the form of: `publisher.name`.
+         * Get a plug-in by its full identifier in the form of: `publisher.name`.
          *
-         * @param pluginId An plug-in identifier.
-         * @return An plug-in or `undefined`.
+         * @param pluginId A plug-in identifier.
+         * @return A plug-in or `undefined`.
          */
         export function getPlugin<T>(pluginId: string): Plugin<T> | undefined;
 
@@ -2667,6 +2667,27 @@ declare module '@theia/plugin' {
     }
 
     /**
+     */
+    export interface ImpersonatorPlugin {
+
+        /**
+         * The id of the plugin.
+         */
+        readonly id: string;
+
+        /**
+         *
+         * @param value
+         */
+        fn(functionName: string, value: Array<any>): Promise<any>;
+
+        /**
+         * Dispose and free associated resources.
+         */
+        dispose(): void;
+    }
+
+    /**
      * Options to configure the behaviour of a file open dialog.
      *
      * * Note 1: A dialog can select files, folders, or both. This is not true for Windows
@@ -4588,6 +4609,8 @@ declare module '@theia/plugin' {
          * An [event](#Event) which fires when the active color theme is changed or has changes.
          */
         export const onDidChangeActiveColorTheme: Event<ColorTheme>;
+
+        export function createImpersonatorPlugin(): theia.ImpersonatorPlugin;
     }
 
     /**
@@ -10929,4 +10952,3 @@ declare module '@theia/plugin' {
         export const onDidChangeSessions: Event<AuthenticationSessionsChangeEvent>;
     }
 }
-
