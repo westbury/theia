@@ -17,7 +17,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as theia from '@theia/plugin';
-import { BackendInitializationFn, PluginAPIFactory, Plugin, emptyPlugin } from '@theia/plugin-ext';
+import { BackendInitializationFn, PluginAPIFactory, PluginReal, emptyPlugin } from '@theia/plugin-ext';
 import { VSCODE_DEFAULT_API_VERSION } from '../common/plugin-vscode-types';
 
 /** Set up en as a default locale for VS Code extensions using vscode-nls */
@@ -25,7 +25,7 @@ process.env['VSCODE_NLS_CONFIG'] = JSON.stringify({ locale: 'en', availableLangu
 process.env['VSCODE_PID'] = process.env['THEIA_PARENT_PID'];
 
 const pluginsApiImpl = new Map<string, typeof theia>();
-const plugins = new Array<Plugin>();
+const plugins = new Array<PluginReal>();
 let defaultApi: typeof theia;
 let isLoadOverride = false;
 let pluginApiFactory: PluginAPIFactory;
@@ -35,7 +35,7 @@ export enum ExtensionKind {
     Workspace = 2
 }
 
-export const doInitialization: BackendInitializationFn = (apiFactory: PluginAPIFactory, plugin: Plugin) => {
+export const doInitialization: BackendInitializationFn = (apiFactory: PluginAPIFactory, plugin: PluginReal) => {
     const vscode = Object.assign(apiFactory(plugin), { ExtensionKind });
 
     // use Theia plugin api instead vscode extensions
@@ -44,7 +44,13 @@ export const doInitialization: BackendInitializationFn = (apiFactory: PluginAPIF
             return vscode.plugins.all.map(p => asExtension(p));
         },
         getExtension(pluginId: string): any | undefined {
-            return asExtension(vscode.plugins.getPlugin(pluginId));
+            console.info(`getExtension called with ${pluginId}`);
+            const result = asExtension(vscode.plugins.getPlugin(pluginId));
+            if (pluginId === 'vscode.git') {
+                // result.exports = { enabled: false };
+                console.info(`  returning ${JSON.stringify(result)}`);
+            }
+            return result;
         },
         get onDidChange(): theia.Event<void> {
             return vscode.plugins.onDidChange;
@@ -92,7 +98,7 @@ function overrideInternalLoad(): void {
     };
 }
 
-function findPlugin(filePath: string): Plugin | undefined {
+function findPlugin(filePath: string): PluginReal | undefined {
     return plugins.find(plugin => filePath.startsWith(plugin.pluginFolder));
 }
 

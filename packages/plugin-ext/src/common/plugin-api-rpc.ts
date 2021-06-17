@@ -100,7 +100,8 @@ export interface PreferenceData {
     [scope: number]: any;
 }
 
-export interface Plugin {
+export interface PluginReal {
+    type: 'real'
     pluginPath: string | undefined;
     pluginFolder: string;
     pluginUri: string;
@@ -108,6 +109,14 @@ export interface Plugin {
     rawModel: PluginPackage;
     lifecycle: PluginLifecycle;
 }
+
+export interface PluginImpersonator {
+    type: 'impersonated'
+    model: PluginModel;
+    exports: {}
+}
+
+export type Plugin = PluginReal | PluginImpersonator;
 
 export interface ConfigStorage {
     hostLogPath: string;
@@ -155,6 +164,7 @@ export interface PluginAPIFactory {
 }
 
 export const emptyPlugin: Plugin = {
+    type: 'real', // TODO have an 'empty' type???
     lifecycle: {
         startMethod: 'empty',
         stopMethod: 'empty'

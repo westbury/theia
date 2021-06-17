@@ -15,7 +15,7 @@
  ********************************************************************************/
 
 import { PluginManagerExtImpl } from '../../plugin/plugin-manager';
-import { MAIN_RPC_CONTEXT, Plugin, PluginAPIFactory } from '../../common/plugin-api-rpc';
+import { MAIN_RPC_CONTEXT, Plugin, PluginReal, PluginAPIFactory } from '../../common/plugin-api-rpc';
 import { PluginMetadata } from '../../common/plugin-protocol';
 import { createAPIFactory } from '../../plugin/plugin-context';
 import { EnvExtImpl } from '../../plugin/env';
@@ -86,7 +86,7 @@ export class PluginHostRPC {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    initContext(contextPath: string, plugin: Plugin): any {
+    initContext(contextPath: string, plugin: PluginReal): any {
         const { name, version } = plugin.rawModel;
         console.log('PLUGIN_HOST(' + process.pid + '): initializing(' + name + '@' + version + ' with ' + contextPath + ')');
         try {
@@ -106,7 +106,7 @@ export class PluginHostRPC {
         const self = this;
         const pluginManager = new PluginManagerExtImpl({
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            loadPlugin(plugin: Plugin): any {
+            loadPlugin(plugin: PluginReal): any {
                 console.log('PLUGIN_HOST(' + process.pid + '): PluginManagerExtImpl/loadPlugin(' + plugin.pluginPath + ')');
                 // cleaning the cache for all files of that plug-in.
                 Object.keys(require.cache).forEach(function (key): void {
@@ -147,10 +147,10 @@ export class PluginHostRPC {
                     return require(plugin.pluginPath);
                 }
             },
-            async init(raw: PluginMetadata[]): Promise<[Plugin[], Plugin[]]> {
+            async init(raw: PluginMetadata[]): Promise<[PluginReal[], PluginReal[]]> {
                 console.log('PLUGIN_HOST(' + process.pid + '): PluginManagerExtImpl/init()');
-                const result: Plugin[] = [];
-                const foreign: Plugin[] = [];
+                const result: PluginReal[] = [];
+                const foreign: PluginReal[] = [];
                 for (const plg of raw) {
                     try {
                         const pluginModel = plg.model;
@@ -160,6 +160,7 @@ export class PluginHostRPC {
                         rawModel.packagePath = pluginModel.packagePath;
                         if (pluginModel.entryPoint!.frontend) {
                             foreign.push({
+                                type: 'real',
                                 pluginPath: pluginModel.entryPoint.frontend!,
                                 pluginFolder: pluginModel.packagePath,
                                 pluginUri: pluginModel.packageUri,
@@ -175,6 +176,7 @@ export class PluginHostRPC {
                             }
 
                             const plugin: Plugin = {
+                                type: 'real',
                                 pluginPath: pluginModel.entryPoint.backend!,
                                 pluginFolder: pluginModel.packagePath,
                                 pluginUri: pluginModel.packageUri,

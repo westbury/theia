@@ -22,7 +22,7 @@
 import { CustomEditorsExt, CustomEditorsMain, PLUGIN_RPC_CONTEXT } from '../common/plugin-api-rpc';
 import * as theia from '@theia/plugin';
 import { RPCProtocol } from '../common/rpc-protocol';
-import { Plugin } from '../common/plugin-api-rpc';
+import { PluginReal } from '../common/plugin-api-rpc';
 import { URI } from './types-impl';
 import { UriComponents } from '../common/uri-components';
 import { DocumentsExtImpl } from './documents';
@@ -49,7 +49,7 @@ export class CustomEditorsExtImpl implements CustomEditorsExt {
         viewType: string,
         provider: theia.CustomReadonlyEditorProvider | theia.CustomTextEditorProvider,
         options: { webviewOptions?: theia.WebviewPanelOptions, supportsMultipleEditorsPerDocument?: boolean },
-        plugin: Plugin
+        plugin: PluginReal
     ): theia.Disposable {
         const disposables = new DisposableCollection();
         if ('resolveCustomTextEditor' in provider) {
@@ -276,11 +276,11 @@ const enum CustomEditorType {
 }
 
 type ProviderEntry = {
-    readonly plugin: Plugin;
+    readonly plugin: PluginReal;
     readonly type: CustomEditorType.Text;
     readonly provider: theia.CustomTextEditorProvider;
 } | {
-    readonly plugin: Plugin;
+    readonly plugin: PluginReal;
     readonly type: CustomEditorType.Custom;
     readonly provider: theia.CustomReadonlyEditorProvider;
 };
@@ -288,11 +288,11 @@ type ProviderEntry = {
 class EditorProviderStore {
     private readonly providers = new Map<string, ProviderEntry>();
 
-    addTextProvider(viewType: string, plugin: Plugin, provider: theia.CustomTextEditorProvider): theia.Disposable {
+    addTextProvider(viewType: string, plugin: PluginReal, provider: theia.CustomTextEditorProvider): theia.Disposable {
         return this.add(CustomEditorType.Text, viewType, plugin, provider);
     }
 
-    addCustomProvider(viewType: string, plugin: Plugin, provider: theia.CustomReadonlyEditorProvider): theia.Disposable {
+    addCustomProvider(viewType: string, plugin: PluginReal, provider: theia.CustomReadonlyEditorProvider): theia.Disposable {
         return this.add(CustomEditorType.Custom, viewType, plugin, provider);
     }
 
@@ -301,7 +301,7 @@ class EditorProviderStore {
     }
 
     private add(type: CustomEditorType, viewType: string,
-        plugin: Plugin, provider: theia.CustomTextEditorProvider | theia.CustomReadonlyEditorProvider): theia.Disposable {
+        plugin: PluginReal, provider: theia.CustomTextEditorProvider | theia.CustomReadonlyEditorProvider): theia.Disposable {
         if (this.providers.has(viewType)) {
             throw new Error(`Provider for viewType:${viewType} already registered`);
         }

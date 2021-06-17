@@ -25,7 +25,7 @@ import {
 import { Emitter } from '@theia/core/lib/common/event';
 import { Disposable, DisposableCollection } from '@theia/core/lib/common/disposable';
 import { Disposable as PluginDisposable, ThemeIcon } from '../types-impl';
-import { Plugin, PLUGIN_RPC_CONTEXT, TreeViewsExt, TreeViewsMain, TreeViewItem, TreeViewRevealOptions } from '../../common/plugin-api-rpc';
+import { PluginReal, PLUGIN_RPC_CONTEXT, TreeViewsExt, TreeViewsMain, TreeViewItem, TreeViewRevealOptions } from '../../common/plugin-api-rpc';
 import { RPCProtocol } from '../../common/rpc-protocol';
 import { CommandRegistryImpl, CommandsConverter } from '../command-registry';
 import { TreeViewSelection } from '../../common';
@@ -51,7 +51,7 @@ export class TreeViewsExtImpl implements TreeViewsExt {
         });
     }
 
-    registerTreeDataProvider<T>(plugin: Plugin, treeViewId: string, treeDataProvider: TreeDataProvider<T>): PluginDisposable {
+    registerTreeDataProvider<T>(plugin: PluginReal, treeViewId: string, treeDataProvider: TreeDataProvider<T>): PluginDisposable {
         const treeView = this.createTreeView(plugin, treeViewId, { treeDataProvider });
 
         return PluginDisposable.create(() => {
@@ -60,7 +60,7 @@ export class TreeViewsExtImpl implements TreeViewsExt {
         });
     }
 
-    createTreeView<T>(plugin: Plugin, treeViewId: string, options: { treeDataProvider: TreeDataProvider<T> }): TreeView<T> {
+    createTreeView<T>(plugin: PluginReal, treeViewId: string, options: { treeDataProvider: TreeDataProvider<T> }): TreeView<T> {
         if (!options || !options.treeDataProvider) {
             throw new Error('Options with treeDataProvider is mandatory');
         }
@@ -176,7 +176,7 @@ class TreeViewExtImpl<T> implements Disposable {
     );
 
     constructor(
-        private plugin: Plugin,
+        private plugin: PluginReal,
         private treeViewId: string,
         private treeDataProvider: TreeDataProvider<T>,
         private proxy: TreeViewsMain,

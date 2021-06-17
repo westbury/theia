@@ -13,7 +13,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-import { QuickOpenExt, PLUGIN_RPC_CONTEXT as Ext, QuickOpenMain, TransferInputBox, Plugin, TransferQuickPick, QuickInputTitleButtonHandle } from '../common/plugin-api-rpc';
+import { QuickOpenExt, PLUGIN_RPC_CONTEXT as Ext, QuickOpenMain, TransferInputBox, PluginReal, TransferQuickPick, QuickInputTitleButtonHandle } from '../common/plugin-api-rpc';
 import * as theia from '@theia/plugin';
 import { QuickPickOptions, QuickPickItem, InputBoxOptions, InputBox, QuickPick, QuickInput } from '@theia/plugin';
 import { CancellationToken } from '@theia/core/lib/common/cancellation';
@@ -109,7 +109,7 @@ export class QuickOpenExtImpl implements QuickOpenExt {
         this.proxy.$showCustomQuickPick(options);
     }
 
-    createQuickPick<T extends QuickPickItem>(plugin: Plugin): QuickPick<T> {
+    createQuickPick<T extends QuickPickItem>(plugin: PluginReal): QuickPick<T> {
         const newQuickInput = new QuickPickExt<T>(this, this.proxy, plugin, this.currentQuickInputs);
         this._sessions.set(this.currentQuickInputs, newQuickInput);
         this.currentQuickInputs += 1;
@@ -136,7 +136,7 @@ export class QuickOpenExtImpl implements QuickOpenExt {
         this.proxy.$showInputBox(options, typeof this.validateInputHandler === 'function');
     }
 
-    createInputBox(plugin: Plugin): InputBox {
+    createInputBox(plugin: PluginReal): InputBox {
         const newQuickInput = new InputBoxExt(this, this.proxy, plugin, this.currentQuickInputs);
         this._sessions.set(this.currentQuickInputs, newQuickInput);
         this.currentQuickInputs += 1;
@@ -215,7 +215,7 @@ export class QuickInputExt implements QuickInput {
     private onDidHideEmitter: Emitter<void>;
     private onDidTriggerButtonEmitter: Emitter<QuickInputButton>;
 
-    constructor(readonly quickOpen: QuickOpenExtImpl, readonly quickOpenMain: QuickOpenMain, readonly plugin: Plugin) {
+    constructor(readonly quickOpen: QuickOpenExtImpl, readonly quickOpenMain: QuickOpenMain, readonly plugin: PluginReal) {
         this.title = undefined;
         this.step = undefined;
         this.totalSteps = undefined;
@@ -400,7 +400,7 @@ export class InputBoxExt extends QuickInputExt implements InputBox {
 
     constructor(readonly quickOpen: QuickOpenExtImpl,
         readonly quickOpenMain: QuickOpenMain,
-        readonly plugin: Plugin,
+        readonly plugin: PluginReal,
         readonly quickInputIndex: number) {
 
         super(quickOpen, quickOpenMain, plugin);
@@ -517,7 +517,7 @@ export class QuickPickExt<T extends QuickPickItem> extends QuickInputExt impleme
 
     constructor(readonly quickOpen: QuickOpenExtImpl,
         readonly quickOpenMain: QuickOpenMain,
-        readonly plugin: Plugin,
+        readonly plugin: PluginReal,
         readonly quickInputIndex: number) {
 
         super(quickOpen, quickOpenMain, plugin);

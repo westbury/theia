@@ -17,14 +17,14 @@
 import * as path from 'path';
 import { URI } from './types-impl';
 import { IconUrl, PluginPackage } from '../common/plugin-protocol';
-import { Plugin } from '../common/plugin-api-rpc';
+import { PluginReal } from '../common/plugin-api-rpc';
 
 export type PluginIconPath = string | URI | {
     light: string | URI,
     dark: string | URI
 };
 export namespace PluginIconPath {
-    export function toUrl(iconPath: PluginIconPath | undefined, plugin: Plugin): IconUrl | undefined {
+    export function toUrl(iconPath: PluginIconPath | undefined, plugin: PluginReal): IconUrl | undefined {
         if (!iconPath) {
             return undefined;
         }
@@ -36,7 +36,7 @@ export namespace PluginIconPath {
         }
         return asString(iconPath, plugin);
     }
-    export function asString(arg: string | URI, plugin: Plugin): string {
+    export function asString(arg: string | URI, plugin: PluginReal): string {
         arg = arg instanceof URI && arg.scheme === 'file' ? arg.fsPath : arg;
         if (typeof arg !== 'string') {
             return arg.toString(true);

@@ -16,15 +16,15 @@
 
 import * as theia from '@theia/plugin';
 import { BackendInitializationFn } from '../../../common/plugin-protocol';
-import { PluginAPIFactory, Plugin, emptyPlugin } from '../../../common/plugin-api-rpc';
+import { PluginAPIFactory, PluginReal, emptyPlugin } from '../../../common/plugin-api-rpc';
 
 const pluginsApiImpl = new Map<string, typeof theia>();
-const plugins = new Array<Plugin>();
+const plugins = new Array<PluginReal>();
 let defaultApi: typeof theia;
 let isLoadOverride = false;
 let pluginApiFactory: PluginAPIFactory;
 
-export const doInitialization: BackendInitializationFn = (apiFactory: PluginAPIFactory, plugin: Plugin) => {
+export const doInitialization: BackendInitializationFn = (apiFactory: PluginAPIFactory, plugin: PluginReal) => {
 
     const apiImpl = apiFactory(plugin);
     pluginsApiImpl.set(plugin.model.id, apiImpl);
@@ -66,6 +66,6 @@ function overrideInternalLoad(): void {
     };
 }
 
-function findPlugin(filePath: string): Plugin | undefined {
+function findPlugin(filePath: string): PluginReal | undefined {
     return plugins.find(plugin => filePath.startsWith(plugin.pluginFolder));
 }

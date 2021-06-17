@@ -22,6 +22,7 @@ import {
     PluginManagerExt,
     PluginManager,
     Plugin,
+    PluginReal,
     PluginAPI,
     ConfigStorage,
     PluginManagerInitializeParams,
@@ -44,9 +45,9 @@ import { SecretsExtImpl, SecretStorageExt } from '../plugin/secrets-ext';
 export interface PluginHost {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    loadPlugin(plugin: Plugin): any;
+    loadPlugin(plugin: PluginReal): any;
 
-    init(data: PluginMetadata[]): Promise<[Plugin[], Plugin[]]> | [Plugin[], Plugin[]];
+    init(data: PluginMetadata[]): Promise<[PluginReal[], PluginReal[]]> | [PluginReal[], PluginReal[]];
 
     initExtApi(extApi: ExtPluginApi[]): void;
 
@@ -236,7 +237,7 @@ export class PluginManagerExtImpl implements PluginManagerExt, PluginManager {
         this.fireOnDidChange();
     }
 
-    protected registerPlugin(plugin: Plugin): void {
+    protected registerPlugin(plugin: PluginReal): void {
         if (plugin.model.id === 'vscode.json-language-features' && this.jsonValidation.length) {
             // VS Code contribute all built-in validations via vscode.json-language-features
             // we enrich them with Theia validations registered on the startup
@@ -269,73 +270,95 @@ export class PluginManagerExtImpl implements PluginManagerExt, PluginManager {
     }
 
     protected async loadPlugin(plugin: Plugin, configStorage: ConfigStorage, visited = new Set<string>()): Promise<boolean> {
-        if (plugin.model.displayName === 'Git Native') {
-            // Natives are not deployed
+        switch (plugin.type) {
+            case 'impersonated':
+                // Natives are not deployed
 
-            // but we must add to 'activated' list.  That is where plugins are found when something depends on it,
-            // and where its API is found.
-            // TODO this is not used from activatedPlugins....
-            console.log(`plugin ${plugin.model.id} is native and being set as activated.`);
-            const pluginContext = this.createContext(plugin, configStorage);
-            this.pluginContextsMap.set(plugin.model.id, pluginContext);
+                // but we must add to 'activated' list.  That is where plugins are found when something depends on it,
+                // and where its API is found.
+                // TODO this is not used from activatedPlugins....
+                console.log(`plugin ${plugin.model.id} is native and being set as activated.`);
 
-            const pluginMain = {
-                enabled: true,
-                getAPI: (version: number) => ({
-                    git: { path: 'git' }
-                })
-            };
+                // TODO check we don't need context here - Nigel
+                const fakeRealPlugin: PluginReal = {
+                    type: 'real',
 
-            this.activatedPlugins.set(plugin.model.id, new ActivatedPlugin(pluginContext, pluginMain));
+                    /**
+                     * The absolute file path of the directory containing this plug-in.
+                     */
+                    pluginPath: '<none>',
+                    pluginFolder: '',
+                    rawModel: { engines: {}, ...plugin.model },
+                    /**
+                     * The uri of the directory containing this plug-in.
+                     */
+                    pluginUri: 'file://foo',
 
-            return true;
-        }
+                    model: plugin.model,
+                    lifecycle: { startMethod: 'activate', stopMethod: 'deactivate' }
+                };
+                const pluginContext = this.createContext(fakeRealPlugin, configStorage);
+                this.pluginContextsMap.set(plugin.model.id, pluginContext);
 
-        // in order to break cycles
-        if (visited.has(plugin.model.id)) {
-            return true;
-        }
-        visited.add(plugin.model.id);
+                const fakePluginMain = {
+                    enabled: true,
+                    getAPI: (version: number) => ({
+                        git: { path: 'git' }
+                    })
+                };
 
-        let loading = this.loadedPlugins.get(plugin.model.id);
-        if (!loading) {
-            loading = (async () => {
-                const progressId = await this.notificationMain.$startProgress({
-                    title: `Activating ${plugin.model.displayName || plugin.model.name}`,
-                    location: 'window'
-                });
-                try {
-                    if (plugin.rawModel.extensionDependencies) {
-                        for (const dependencyId of plugin.rawModel.extensionDependencies) {
-                            const dependency = this.registry.get(dependencyId.toLowerCase());
-                            if (dependency) {
-                                const loadedSuccessfully = await this.loadPlugin(dependency, configStorage, visited);
-                                if (!loadedSuccessfully) {
-                                    throw new Error(`Dependent extension '${dependency.model.displayName || dependency.model.id}' failed to activate.`);
-                                }
-                            } else {
-                                throw new Error(`Dependent extension '${dependencyId}' is not installed.`);
-                            }
-                        }
-                    }
+                this.activatedPlugins.set(plugin.model.id, new ActivatedPlugin(pluginContext, fakePluginMain));
 
-                    let pluginMain = this.host.loadPlugin(plugin);
-                    // see https://github.com/TypeFox/vscode/blob/70b8db24a37fafc77247de7f7cb5bb0195120ed0/src/vs/workbench/api/common/extHostExtensionService.ts#L372-L376
-                    pluginMain = pluginMain || {};
-                    await this.startPlugin(plugin, configStorage, pluginMain);
+                return true;
+
+            case 'real':
+
+                // in order to break cycles
+                if (visited.has(plugin.model.id)) {
                     return true;
-                } catch (err) {
-                    const message = `Activating extension '${plugin.model.displayName || plugin.model.name}' failed:`;
-                    this.messageRegistryProxy.$showMessage(MainMessageType.Error, message + ' ' + err.message, {}, []);
-                    console.error(message, err);
-                    return false;
-                } finally {
-                    this.notificationMain.$stopProgress(progressId);
                 }
-            })();
+                visited.add(plugin.model.id);
+
+                let loading = this.loadedPlugins.get(plugin.model.id);
+                if (!loading) {
+                    loading = (async () => {
+                        const progressId = await this.notificationMain.$startProgress({
+                            title: `Activating ${plugin.model.displayName || plugin.model.name}`,
+                            location: 'window'
+                        });
+                        try {
+                            if (plugin.rawModel.extensionDependencies) {
+                                for (const dependencyId of plugin.rawModel.extensionDependencies) {
+                                    const dependency = this.registry.get(dependencyId.toLowerCase());
+                                    if (dependency) {
+                                        const loadedSuccessfully = await this.loadPlugin(dependency, configStorage, visited);
+                                        if (!loadedSuccessfully) {
+                                            throw new Error(`Dependent extension '${dependency.model.displayName || dependency.model.id}' failed to activate.`);
+                                        }
+                                    } else {
+                                        throw new Error(`Dependent extension '${dependencyId}' is not installed.`);
+                                    }
+                                }
+                            }
+
+                            let pluginMain = this.host.loadPlugin(plugin);
+                            // see https://github.com/TypeFox/vscode/blob/70b8db24a37fafc77247de7f7cb5bb0195120ed0/src/vs/workbench/api/common/extHostExtensionService.ts#L372-L376
+                            pluginMain = pluginMain || {};
+                            await this.startPlugin(plugin, configStorage, pluginMain);
+                            return true;
+                        } catch (err) {
+                            const message = `Activating extension '${plugin.model.displayName || plugin.model.name}' failed:`;
+                            this.messageRegistryProxy.$showMessage(MainMessageType.Error, message + ' ' + err.message, {}, []);
+                            console.error(message, err);
+                            return false;
+                        } finally {
+                            this.notificationMain.$stopProgress(progressId);
+                        }
+                    })();
+                }
+                this.loadedPlugins.set(plugin.model.id, loading);
+                return loading;
         }
-        this.loadedPlugins.set(plugin.model.id, loading);
-        return loading;
     }
 
     async $updateStoragePath(path: string | undefined): Promise<void> {
@@ -367,7 +390,7 @@ export class PluginManagerExtImpl implements PluginManagerExt, PluginManager {
         }
     }
 
-    private createContext(plugin: Plugin, configStorage: ConfigStorage): theia.PluginContext {
+    private createContext(plugin: PluginReal, configStorage: ConfigStorage): theia.PluginContext {
         const subscriptions: theia.Disposable[] = [];
         const asAbsolutePath = (relativePath: string): string => join(plugin.pluginFolder, relativePath);
         const logPath = join(configStorage.hostLogPath, plugin.model.id); // todo check format
@@ -393,7 +416,7 @@ export class PluginManagerExtImpl implements PluginManagerExt, PluginManager {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private async startPlugin(plugin: Plugin, configStorage: ConfigStorage, pluginMain: any): Promise<void> {
+    private async startPlugin(plugin: PluginReal, configStorage: ConfigStorage, pluginMain: any): Promise<void> {
         const pluginContext = this.createContext(plugin, configStorage);
         this.pluginContextsMap.set(plugin.model.id, pluginContext);
 

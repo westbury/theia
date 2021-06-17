@@ -18,7 +18,7 @@ import { v4 } from 'uuid';
 import { WebviewsExt, WebviewPanelViewState, WebviewsMain, PLUGIN_RPC_CONTEXT, WebviewInitData, /* WebviewsMain, PLUGIN_RPC_CONTEXT  */ } from '../common/plugin-api-rpc';
 import * as theia from '@theia/plugin';
 import { RPCProtocol } from '../common/rpc-protocol';
-import { Plugin } from '../common/plugin-api-rpc';
+import { PluginReal } from '../common/plugin-api-rpc';
 import { Emitter, Event } from '@theia/core/lib/common/event';
 import { fromViewColumn, toViewColumn, toWebviewPanelShowOptions } from './type-converters';
 import { Disposable, WebviewPanelTargetArea, URI } from './types-impl';
@@ -30,7 +30,7 @@ export class WebviewsExtImpl implements WebviewsExt {
     private readonly webviewPanels = new Map<string, WebviewPanelImpl>();
     private readonly serializers = new Map<string, {
         serializer: theia.WebviewPanelSerializer,
-        plugin: Plugin
+        plugin: PluginReal
     }>();
     private initData: WebviewInitData | undefined;
 
@@ -101,7 +101,7 @@ export class WebviewsExtImpl implements WebviewsExt {
         title: string,
         showOptions: theia.ViewColumn | theia.WebviewPanelShowOptions,
         options: theia.WebviewPanelOptions & theia.WebviewOptions,
-        plugin: Plugin
+        plugin: PluginReal
     ): theia.WebviewPanel {
         const viewId = v4();
         const webviewShowOptions = toWebviewPanelShowOptions(showOptions);
@@ -116,7 +116,7 @@ export class WebviewsExtImpl implements WebviewsExt {
         title: string,
         showOptions: theia.ViewColumn | theia.WebviewPanelShowOptions,
         options: theia.WebviewPanelOptions & theia.WebviewOptions,
-        plugin: Plugin,
+        plugin: PluginReal,
         viewId: string
     ): WebviewPanelImpl {
         if (!this.initData) {
@@ -132,7 +132,7 @@ export class WebviewsExtImpl implements WebviewsExt {
     registerWebviewPanelSerializer(
         viewType: string,
         serializer: theia.WebviewPanelSerializer,
-        plugin: Plugin
+        plugin: PluginReal
     ): theia.Disposable {
         if (this.serializers.has(viewType)) {
             throw new Error(`Serializer for '${viewType}' already registered`);
@@ -172,7 +172,7 @@ export class WebviewImpl implements theia.Webview {
         options: theia.WebviewOptions,
         private readonly initData: WebviewInitData,
         private readonly workspace: WorkspaceExtImpl,
-        readonly plugin: Plugin
+        readonly plugin: PluginReal
     ) {
         this._options = options;
     }
@@ -234,7 +234,7 @@ export class WebviewImpl implements theia.Webview {
         }
     }
 
-    static toWebviewOptions(options: theia.WebviewOptions, workspace: WorkspaceExtImpl, plugin: Plugin): theia.WebviewOptions {
+    static toWebviewOptions(options: theia.WebviewOptions, workspace: WorkspaceExtImpl, plugin: PluginReal): theia.WebviewOptions {
         return {
             ...options,
             localResourceRoots: options.localResourceRoots || [

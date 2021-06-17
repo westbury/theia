@@ -24,7 +24,7 @@ import { CancellationTokenSource } from '@theia/core/lib/common/cancellation';
 import { QuickOpenExtImpl } from './quick-open';
 import {
     MAIN_RPC_CONTEXT,
-    Plugin as InternalPlugin,
+    PluginReal,
     PluginManager,
     PluginAPIFactory,
     MainMessageType
@@ -212,7 +212,7 @@ export function createAPIFactory(
     const impersonatorPluginRegistryExt = rpc.set(MAIN_RPC_CONTEXT.IMPERSONATOR_PLUGIN_REGISTRY_EXT, new ImpersonatorPluginRegistryExtImpl(rpc));
     rpc.set(MAIN_RPC_CONTEXT.DEBUG_EXT, debugExt);
 
-    return function (plugin: InternalPlugin): typeof theia {
+    return function (plugin: PluginReal): typeof theia {
         const authentication: typeof theia.authentication = {
             registerAuthenticationProvider(provider: theia.AuthenticationProvider): theia.Disposable {
                 return authenticationExt.registerAuthenticationProvider(provider);
@@ -244,7 +244,7 @@ export function createAPIFactory(
             registerCommand(command: theia.CommandDescription | string, handler?: <T>(...args: any[]) => T | Thenable<T | undefined>, thisArg?: any): Disposable {
                 // use of the ID when registering commands
                 if (typeof command === 'string') {
-                    const rawCommands = plugin.rawModel.contributes && plugin.rawModel.contributes.commands;
+                    const rawCommands = plugin.type === 'real' && plugin.rawModel.contributes && plugin.rawModel.contributes.commands;
                     const contributedCommands = rawCommands ? Array.isArray(rawCommands) ? rawCommands : [rawCommands] : undefined;
                     if (handler && contributedCommands && contributedCommands.some(item => item.command === command)) {
                         return commandRegistry.registerHandler(command, handler, thisArg);
@@ -726,56 +726,67 @@ export function createAPIFactory(
         const plugins: typeof theia.plugins = {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             get all(): theia.Plugin<any>[] {
-                return pluginManager.getAllPlugins().map(plg => new Plugin(pluginManager, plg));
+                // return pluginManager.getAllPlugins().map(plg => new Plugin(pluginManager, plg));
+                const allPlugins: theia.Plugin<any>[] = [];
+                pluginManager.getAllPlugins().forEach(plg => {
+                    const p = this.getPlugin(plg.model.id);
+                    if (p) {
+                        allPlugins.push(p);
+                    }
+                });
+                return allPlugins;
             },
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             getPlugin(pluginId: string): theia.Plugin<any> | undefined {
-                if (pluginId === 'vscode.git') {
-                    return {
-                        id: pluginId,
-
-                        /**
-                         * The absolute file path of the directory containing this plug-in.
-                         */
-                        pluginPath: '<none>',
-
-                        /**
-                         * The uri of the directory containing this plug-in.
-                         */
-                        pluginUri: URI.parse(plugin.pluginUri),
-
-                        /**
-                         * `true` if the plug-in has been activated.
-                         */
-                        isActive: true,
-
-                        /**
-                         * The parsed contents of the plug-in's package.json.
-                         */
-                        packageJSON: {},
-
-                        /**
-                         *
-                         */
-                        pluginType: 'backend',
-
-                        /**
-                         * The public API exported by this plug-in. It is an invalid action
-                         * to access this field before this plug-in has been activated.
-                         */
-                        exports: pluginManager.getPluginExport(pluginId),
-
-                        /**
-                         * Activates this plug-in and returns its public API.
-                         *
-                         * @return A promise that will resolve when this plug-in has been activated.
-                         */
-                        activate: () => Promise.resolve()
-                    };
-                }
                 const plg = pluginManager.getPluginById(pluginId.toLowerCase());
                 if (plg) {
-                    return new Plugin(pluginManager, plg);
+                    switch (plg.type) {
+                        case 'impersonated':
+                            return {
+                                id: pluginId,
+
+                                /**
+                                 * The absolute file path of the directory containing this plug-in.
+                                 */
+                                pluginPath: '<none>',
+
+                                /**
+                                 * The uri of the directory containing this plug-in.
+                                 */
+                                pluginUri: URI.parse(plugin.pluginUri),
+
+                                /**
+                                 * `true` if the plug-in has been activated.
+                                 */
+                                isActive: true,
+
+                                /**
+                                 * The parsed contents of the plug-in's package.json.
+                                 */
+                                packageJSON: {},
+
+                                /**
+                                 *
+                                 */
+                                pluginType: 'backend',
+
+                                /**
+                                 * The public API exported by this plug-in. It is an invalid action
+                                 * to access this field before this plug-in has been activated.
+                                 */
+                                exports: pluginManager.getPluginExport(pluginId),
+
+                                /**
+                                 * Activates this plug-in and returns its public API.
+                                 *
+                                 * @return A promise that will resolve when this plug-in has been activated.
+                                 */
+                                activate: () => Promise.resolve()
+                            };
+
+                        case 'real':
+                            return new Plugin(pluginManager, plg);
+                    }
                 }
                 return undefined;
             },
@@ -784,9 +795,11 @@ export function createAPIFactory(
             }
         };
 
-        const debuggersContributions = plugin.rawModel.contributes && plugin.rawModel.contributes.debuggers || [];
-        debugExt.assistedInject(connectionExt, commandRegistry);
-        debugExt.registerDebuggersContributions(plugin.pluginFolder, debuggersContributions);
+        if (plugin.type === 'real') {
+            const debuggersContributions = plugin.rawModel.contributes && plugin.rawModel.contributes.debuggers || [];
+            debugExt.assistedInject(connectionExt, commandRegistry);
+            debugExt.registerDebuggersContributions(plugin.pluginFolder, debuggersContributions);
+        }
         const debug: typeof theia.debug = {
             get activeDebugSession(): theia.DebugSession | undefined {
                 return debugExt.activeDebugSession;
@@ -1011,7 +1024,7 @@ class Plugin<T> implements theia.Plugin<T> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     packageJSON: any;
     pluginType: theia.PluginType;
-    constructor(private readonly pluginManager: PluginManager, plugin: InternalPlugin) {
+    constructor(private readonly pluginManager: PluginManager, plugin: PluginReal) {
         this.id = plugin.model.id;
         this.pluginPath = plugin.pluginFolder;
         this.pluginUri = URI.parse(plugin.pluginUri);

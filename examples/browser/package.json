@@ -60,7 +60,7 @@
     "clean": "theia clean",
     "build": "theia build --mode development",
     "watch": "yarn build --watch",
-    "start": "theia start --plugins=local-dir:../../plugins",
+    "start": "theia start --plugins=local-dir:../../plugins --hosted-plugin-inspect=9339",
     "start:debug": "yarn start --log-level=debug",
     "test": "theia test . --plugins=local-dir:../../plugins --test-spec=../api-tests/**/*.spec.js",
     "test:debug": "yarn test --test-inspect",

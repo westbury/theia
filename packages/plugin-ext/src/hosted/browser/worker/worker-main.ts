@@ -17,7 +17,7 @@
 import { Emitter } from '@theia/core/lib/common/event';
 import { RPCProtocolImpl } from '../../../common/rpc-protocol';
 import { PluginManagerExtImpl } from '../../../plugin/plugin-manager';
-import { MAIN_RPC_CONTEXT, Plugin, emptyPlugin, TerminalServiceExt } from '../../../common/plugin-api-rpc';
+import { MAIN_RPC_CONTEXT, PluginReal, emptyPlugin, TerminalServiceExt } from '../../../common/plugin-api-rpc';
 import { createAPIFactory } from '../../../plugin/plugin-context';
 import { getPluginId, PluginMetadata } from '../../../common/plugin-protocol';
 import * as theia from '@theia/plugin';
@@ -40,7 +40,7 @@ import { SecretsExtImpl } from '../../../plugin/secrets-ext';
 const ctx = self as any;
 
 const pluginsApiImpl = new Map<string, typeof theia>();
-const pluginsModulesNames = new Map<string, Plugin>();
+const pluginsModulesNames = new Map<string, PluginReal>();
 
 const emitter = new Emitter<string>();
 const rpc = new RPCProtocolImpl({
@@ -49,9 +49,9 @@ const rpc = new RPCProtocolImpl({
         ctx.postMessage(m);
     },
 },
-{
-    reviver: reviver
-});
+    {
+        reviver: reviver
+    });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 addEventListener('message', (message: any) => {
@@ -74,7 +74,7 @@ const terminalService: TerminalServiceExt = new TerminalServiceExtImpl(rpc);
 
 const pluginManager = new PluginManagerExtImpl({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    loadPlugin(plugin: Plugin): any {
+    loadPlugin(plugin: PluginReal): any {
         if (plugin.pluginPath) {
             if (isElectron()) {
                 ctx.importScripts(plugin.pluginPath);
@@ -91,14 +91,14 @@ const pluginManager = new PluginManagerExtImpl({
             return ctx[plugin.lifecycle.frontendModuleName];
         }
     },
-    async init(rawPluginData: PluginMetadata[]): Promise<[Plugin[], Plugin[]]> {
-        const result: Plugin[] = [];
-        const foreign: Plugin[] = [];
+    async init(rawPluginData: PluginMetadata[]): Promise<[PluginReal[], PluginReal[]]> {
+        const result: PluginReal[] = [];
+        const foreign: PluginReal[] = [];
         // Process the plugins concurrently, making sure to keep the order.
         const plugins = await Promise.all<{
             /** Where to push the plugin: `result` or `foreign` */
-            target: Plugin[],
-            plugin: Plugin
+            target: PluginReal[],
+            plugin: PluginReal
         }>(rawPluginData.map(async plg => {
             const pluginModel = plg.model;
             const pluginLifecycle = plg.lifecycle;
@@ -110,7 +110,8 @@ const pluginManager = new PluginManagerExtImpl({
                     frontendInitPath = '';
                 }
                 const rawModel = await loadManifest(pluginModel);
-                const plugin: Plugin = {
+                const plugin: PluginReal = {
+                    type: 'real',
                     pluginPath: pluginModel.entryPoint.frontend!,
                     pluginFolder: pluginModel.packagePath,
                     pluginUri: pluginModel.packageUri,
@@ -126,6 +127,7 @@ const pluginManager = new PluginManagerExtImpl({
                 return {
                     target: foreign,
                     plugin: {
+                        type: 'real',
                         pluginPath: pluginModel.entryPoint.backend,
                         pluginFolder: pluginModel.packagePath,
                         pluginUri: pluginModel.packageUri,
@@ -134,7 +136,7 @@ const pluginManager = new PluginManagerExtImpl({
                         get rawModel(): never {
                             throw new Error('not supported');
                         }
-                    }
+                    } as PluginReal
                 };
             }
         }));
